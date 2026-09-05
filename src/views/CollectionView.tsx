@@ -35,7 +35,7 @@ export function CollectionView({ all = false }: { all?: boolean }) {
     <div className="page collection-page">
       <header className="collection-header">
         <div className="collection-header__icon">{Icon ? <Icon /> : <span className="all-shelves-icon">✦</span>}</div>
-        <div><span className="eyebrow">{all ? 'All collections' : 'Library collection'}</span><h1>{title}</h1><p>{description}</p></div>
+        <div><span className="eyebrow">{all ? 'All collections' : 'Orbis collection'}</span><h1>{title}</h1><p>{description}</p></div>
         <span className="collection-header__count">{data?.total ?? '...'} <small>records</small></span>
       </header>
 

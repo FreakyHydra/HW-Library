@@ -27,7 +27,7 @@ export function AppShell() {
         </div>
         <nav className="library-nav" aria-label="Library collections">
           <NavLink className={({ isActive }) => `library-nav__item ${isActive ? 'is-active' : ''}`} to="/" end>
-            <BookGlyph /><span><strong>Library home</strong><small>Your archive at a glance</small></span>
+            <BookGlyph /><span><strong>Orbis home</strong><small>Your archive at a glance</small></span>
           </NavLink>
           <div className="library-nav__label">Collections</div>
           {libraryNavigation.map(({ type, label, icon: Icon }) => (
@@ -49,7 +49,7 @@ export function AppShell() {
           <button className="icon-button menu-button" onClick={() => setMenuOpen(true)} aria-label="Open navigation"><Menu size={22} /></button>
           <form className="global-search" onSubmit={submitSearch}>
             <Search size={18} aria-hidden="true" />
-            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search every shelf..." aria-label="Search the whole Library" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search every shelf..." aria-label="Search all of Orbis" />
             <kbd>Enter</kbd>
           </form>
           <div className="keeper-badge" title="Coda is keeping watch">

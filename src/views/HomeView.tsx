@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { libraryApi } from '../api/client';
 import { libraryNavigation } from '../app/library-nav';
@@ -11,9 +11,8 @@ export function HomeView() {
 
   return (
     <div className="page home-page">
-      <section className="banner-gate" aria-label="Welcome to The Howling Whispers Library">
-        <img src="/assets/howling-whispers-library-banner.webp" alt="Coda welcomes you to The Howling Whispers Library beneath a moonlit sky" />
-        <a className="banner-gate__button" href="#shelves"><span>Enter the Library</span><ArrowDown size={17} /></a>
+      <section className="banner-gate" aria-label="Welcome to Orbis, the Library of Howling Whispers">
+        <img src="/assets/orbis-banner.webp" alt="Coda welcomes you to Orbis, the Library of Howling Whispers" />
       </section>
 
       <section className="section-block" id="shelves">

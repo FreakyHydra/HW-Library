@@ -9,5 +9,5 @@ export function EmptyState({ search }: { search?: string }) {
 }
 
 export function ErrorState({ retry }: { retry?: () => void }) {
-  return <div className="state-panel state-panel--error"><CloudOff /><strong>The archive is out of reach</strong><span>Your records are safe. The Library service could not answer.</span>{retry && <button className="button button--secondary" onClick={retry}>Try again</button>}</div>;
+  return <div className="state-panel state-panel--error"><CloudOff /><strong>The archive is out of reach</strong><span>Your records are safe. Orbis could not answer.</span>{retry && <button className="button button--secondary" onClick={retry}>Try again</button>}</div>;
 }

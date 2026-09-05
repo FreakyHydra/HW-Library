@@ -1,8 +1,8 @@
-# HW-Library
+# Orbis
 
-The standalone reusable asset archive for The Howling Whispers.
+Orbis is the standalone reusable asset archive for The Howling Whispers.
 
-This repository contains the user-facing Library frontend and its Library-specific API client. It is intentionally separate from Rebrand (`HW-Landing`) and from the future Project Whispers simulation runtime.
+The `HW-Library` repository contains the user-facing Orbis frontend and its Library-specific API client. It is intentionally separate from Rebrand (`HW-Landing`) and from the future Project Whispers simulation runtime.
 
 ## Current direction
 
