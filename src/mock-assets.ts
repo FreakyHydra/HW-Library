@@ -1,0 +1,53 @@
+import type { LibraryAsset } from './types'
+
+export const mockAssets: LibraryAsset[] = [
+  {
+    id: 'char-ragna-holte',
+    kind: 'character',
+    name: 'Ragna Holte',
+    description: 'A steady, experienced wolf with deep ties to family, place, and the history around her.',
+    originWorld: 'Bitterroot',
+    source: 'curated',
+    tags: ['wolf', 'family', 'bitterroot'],
+    updatedAt: '2026-09-05T05:00:00Z',
+  },
+  {
+    id: 'place-ragna-bedroom',
+    kind: 'place',
+    name: "Ragna's Bedroom",
+    description: 'A private room with its own atmosphere, objects, history, and place inside the larger Bitterroot reality.',
+    originWorld: 'Bitterroot',
+    source: 'curated',
+    tags: ['interior', 'private', 'home'],
+    updatedAt: '2026-09-05T04:45:00Z',
+  },
+  {
+    id: 'place-whispering-woods',
+    kind: 'place',
+    name: 'Whispering Woods',
+    description: 'An old woodland region shaped by hidden paths, water, memory, and dangerous quiet.',
+    originWorld: 'Bitterroot',
+    source: 'curated',
+    tags: ['region', 'forest', 'exploration'],
+    updatedAt: '2026-09-05T03:50:00Z',
+  },
+  {
+    id: 'faction-river-watch',
+    kind: 'faction',
+    name: 'River Watch',
+    description: 'A faction tied to territory, duty, and the people living along the river routes.',
+    originWorld: 'Bitterroot',
+    source: 'curated',
+    tags: ['faction', 'river', 'watch'],
+    updatedAt: '2026-09-04T20:00:00Z',
+  },
+  {
+    id: 'world-bitterroot',
+    kind: 'world',
+    name: 'Bitterroot',
+    description: 'A living pre-industrial world of survival, freedom, history, relationships, and consequences.',
+    source: 'public',
+    tags: ['world', 'dark-fantasy', 'living-canon'],
+    updatedAt: '2026-09-05T05:10:00Z',
+  },
+]
