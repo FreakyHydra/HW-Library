@@ -6,6 +6,42 @@ import { BrandMark } from './BrandMark';
 import { discordLoginPath, useAuth } from '../auth/AuthContext';
 import { UserAvatar } from './UserAvatar';
 
+const SPECULUS_TARGET = new Date('2026-09-14T12:00:00+02:00').getTime();
+
+function formatCountdown(target: number, now: number) {
+  const remaining = Math.max(0, target - now);
+  if (remaining === 0) return 'CONCEPT LIVE';
+  const totalMinutes = Math.floor(remaining / 60_000);
+  const days = Math.floor(totalMinutes / 1_440);
+  const hours = Math.floor((totalMinutes % 1_440) / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(days).padStart(2, '0')}D ${String(hours).padStart(2, '0')}H ${String(minutes).padStart(2, '0')}M`;
+}
+
+function ProjectEtas() {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="project-etas" aria-label="Upcoming project release estimates">
+      <div className="project-eta project-eta--speculus" title="Speculus working concept target: 14 September 2026">
+        <span className="project-eta__name">Speculus</span>
+        <strong className="project-eta__time" aria-live="polite">{formatCountdown(SPECULUS_TARGET, now)}</strong>
+        <small>14 SEP · WORKING CONCEPT</small>
+      </div>
+      <div className="project-eta project-eta--fabula" title="Fabula concept estimate: 20 to 27 September 2026">
+        <span className="project-eta__name">Fabula</span>
+        <strong className="project-eta__time">2–3 WEEKS</strong>
+        <small>20–27 SEP · CONCEPT ETA</small>
+      </div>
+    </div>
+  );
+}
+
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -56,6 +92,7 @@ export function AppShell() {
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search every shelf..." aria-label="Search all of Orbis" />
             <kbd>Enter</kbd>
           </form>
+          <ProjectEtas />
           {user ? (
             <NavLink className="keeper-badge keeper-badge--user" to="/account" title="Open your Orbis account">
               <UserAvatar user={user} />
