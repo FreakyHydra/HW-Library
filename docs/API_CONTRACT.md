@@ -20,4 +20,17 @@ Supported asset query parameters are `type`, `search`, `sourceType` and `sort`.
 - `AssetQuery` defines the first global index query surface.
 - `SimulationTarget` reserves the dormant boundary for Project Whispers without coupling this site to a runtime.
 
-Authentication, mutation endpoints, Rebrand deep links and simulation context are intentionally left for their assigned phases.
+## Authentication and visibility
+
+Discord authentication uses same-origin routes under `/api/auth`. `GET /api/auth/me` returns the signed-in profile and the server-calculated `canViewAdult` and `canCreate` permissions.
+
+Every asset has a `contentRating` of `sfw` or `adult`. When the current session cannot view adult content, list and overview responses retain a neutral card but replace all sensitive fields and set `restricted: true` with `verificationPath: /verification`. Direct detail requests return `403`.
+
+## Initial write endpoints
+
+| Method | Path | Access |
+| --- | --- | --- |
+| `POST` | `/v1/library/assets` | Accepted Discord creator role |
+| `PATCH` | `/v1/library/assets/:id` | Accepted Discord creator role and matching immutable creator ID |
+
+Records store `creator_user_id`. Responses join that ID to the creator's current profile, keeping visible author names fluid without weakening ownership.

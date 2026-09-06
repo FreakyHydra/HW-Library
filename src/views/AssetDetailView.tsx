@@ -1,4 +1,4 @@
-import { ArrowLeft, Boxes, Clock3, MapPin, Pencil, Sparkles } from 'lucide-react';
+import { ArrowLeft, Boxes, Clock3, MapPin, Pencil, Sparkles, UserRound } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { libraryApi } from '../api/client';
 import { findNavigationItem } from '../app/library-nav';
@@ -27,7 +27,7 @@ export function AssetDetailView() {
       </section>
       <div className="detail-layout">
         <section className="record-panel"><span className="eyebrow">Archive note</span><h2>About this record</h2><p>{asset.summary}</p><div className="tag-row tag-row--large">{asset.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></section>
-        <aside className="metadata-panel"><h2>Record details</h2>{asset.originWorldName && <div><MapPin /><span><small>Origin world</small><strong>{asset.originWorldName}</strong></span></div>}<div><Boxes /><span><small>Known dependencies</small><strong>{asset.dependencyCount} connected records</strong></span></div><div><Clock3 /><span><small>Last tended</small><strong>{new Date(asset.updatedAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong></span></div></aside>
+        <aside className="metadata-panel"><h2>Record details</h2>{asset.author && <div>{asset.author.avatarUrl ? <img className="author-avatar" src={asset.author.avatarUrl} alt="" /> : <UserRound />}<span><small>Created by</small><strong>{asset.author.displayName}</strong></span></div>}{asset.originWorldName && <div><MapPin /><span><small>Origin world</small><strong>{asset.originWorldName}</strong></span></div>}<div><Boxes /><span><small>Known dependencies</small><strong>{asset.dependencyCount} connected records</strong></span></div><div><Clock3 /><span><small>Last tended</small><strong>{new Date(asset.updatedAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</strong></span></div></aside>
       </div>
     </div>
   );

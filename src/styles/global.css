@@ -86,10 +86,19 @@ body::before {
 .global-search input::placeholder { color: #71839e; }
 kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba(171, 201, 241, .28); border-radius: 4px; color: #7386a2; font: 9px 'Nunito Sans'; }
 .keeper-badge { display: flex; align-items: center; gap: 9px; margin-left: auto; }
+.keeper-badge--user { position: relative; min-width: 0; }
+.keeper-badge--user:hover strong { color: var(--moon); }
+.keeper-badge__verified { color: var(--amber); }
 .keeper-badge__face { display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid rgba(222, 189, 139, .32); border-radius: 50%; background: #142948; color: var(--amber-bright); font-size: 12px; }
 .keeper-badge small, .keeper-badge strong { display: block; }
 .keeper-badge small { color: var(--faint); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
 .keeper-badge strong { margin-top: 1px; font-family: var(--serif); font-size: 17px; font-weight: 600; }
+.user-avatar { position: relative; display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; background: #193457; color: var(--amber-bright); font-family: var(--serif); overflow: visible; }
+.user-avatar__image { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.user-avatar__decoration { position: absolute; width: 122%; height: 122%; max-width: none; inset: -11%; pointer-events: none; }
+.discord-login { min-height: 38px; display: inline-flex; align-items: center; gap: 8px; margin-left: auto; padding: 0 13px; border: 1px solid rgba(173, 186, 255, .3); border-radius: 8px; background: #5865f2; color: white; font-size: 11px; font-weight: 700; }
+.discord-login:hover { filter: brightness(1.1); }
+.discord-login.is-loading { opacity: .75; }
 
 .content { width: 100%; }
 .page { width: min(1420px, 100%); margin: 0 auto; padding: 32px 36px 70px; }
@@ -159,6 +168,8 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba
 .button--primary { border-color: rgba(232, 197, 142, .46); background: linear-gradient(180deg, #b5844c, #795329); color: #fff8eb; box-shadow: 0 8px 20px rgba(40, 20, 5, .25), inset 0 1px rgba(255,255,255,.18); }
 .button--primary:hover { filter: brightness(1.12); }
 .button--secondary, .button--ghost { border-color: var(--line-strong); background: rgba(29, 54, 91, .34); color: var(--moon-bright); }
+.button--discord { border-color: rgba(178, 188, 255, .36); background: #5865f2; color: white; }
+.button:disabled { opacity: .55; cursor: not-allowed; }
 .button--disabled { border-color: var(--line); background: rgba(31, 46, 70, .35); color: #667791; cursor: not-allowed; }
 
 .collection-page { padding-top: 45px; }
@@ -207,6 +218,7 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba
 .tag-row--large span { padding: 5px 9px; font-size: 8px; }
 .metadata-panel > div { display: flex; align-items: center; gap: 11px; padding: 13px 0; border-top: 1px solid var(--line); }
 .metadata-panel svg { width: 18px; color: var(--amber); }
+.metadata-panel .author-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 .metadata-panel small, .metadata-panel strong { display: block; }
 .metadata-panel small { color: var(--faint); font-size: 8px; text-transform: uppercase; letter-spacing: .11em; }
 .metadata-panel strong { margin-top: 2px; font-size: 10px; }
@@ -215,6 +227,33 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba
 .not-found > span { color: var(--amber); font-family: var(--serif); font-size: 24px; letter-spacing: .2em; }
 .not-found h1 { margin: 5px 0; font-family: var(--serif); font-size: 42px; }
 .not-found p { margin: 0 0 22px; color: var(--muted); }
+
+.account-page, .verification-page { padding-top: 48px; }
+.account-panel, .verification-panel { width: min(760px, 100%); margin: 0 auto; padding: clamp(24px, 5vw, 46px); border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, rgba(20, 40, 72, .93), rgba(8, 18, 35, .96)); box-shadow: var(--shadow); }
+.account-panel--signed-out, .verification-panel { text-align: center; }
+.account-panel h1, .verification-panel h1 { margin: 5px 0 9px; font-family: var(--serif); font-size: clamp(36px, 6vw, 55px); line-height: 1; }
+.account-panel > p, .verification-panel > p { color: var(--muted); line-height: 1.65; }
+.account-identity { display: flex; align-items: center; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+.account-identity h1 { margin-bottom: 2px; }
+.account-identity p { margin: 0; color: var(--faint); }
+.profile-form { padding: 26px 0; }
+.profile-form label { display: block; margin-bottom: 8px; color: var(--moon); font-size: 13px; font-weight: 700; }
+.profile-form > div { display: flex; gap: 9px; }
+.profile-form input { flex: 1; min-width: 0; padding: 0 13px; border: 1px solid var(--line-strong); border-radius: 8px; outline: 0; background: rgba(6, 15, 30, .62); color: var(--text); font-size: 15px; }
+.profile-form input:focus { border-color: var(--moon); }
+.profile-form small { display: block; margin-top: 8px; color: var(--faint); font-size: 12px; }
+.form-message { margin: 8px 0 0; color: var(--amber-bright); font-size: 13px; }
+.permission-card { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 24px; padding: 16px; border: 1px solid rgba(208, 177, 126, .2); border-radius: 10px; background: rgba(99, 69, 33, .16); }
+.permission-card svg { flex: 0 0 auto; color: var(--amber); }
+.permission-card strong { font-family: var(--serif); font-size: 19px; }
+.permission-card p { margin: 3px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.verification-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 30px 0; text-align: left; }
+.verification-steps > div { display: flex; gap: 12px; padding: 17px; border: 1px solid var(--line); border-radius: 10px; background: rgba(13, 29, 53, .72); }
+.verification-steps svg { flex: 0 0 auto; color: var(--amber); }
+.verification-steps strong, .verification-steps small { display: block; }
+.verification-steps strong { font-family: var(--serif); font-size: 18px; }
+.verification-steps small { margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.verification-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
 
 @media (max-width: 1160px) {
   .category-grid, .asset-grid, .asset-grid--collection { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -235,6 +274,8 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba
   .topbar { height: 62px; padding: 0 14px; gap: 8px; }
   .global-search { width: auto; flex: 1; }
   .global-search kbd, .keeper-badge > span:last-child { display: none; }
+  .discord-login span { display: none; }
+  .discord-login { width: 38px; padding: 0; justify-content: center; }
   .page { padding: 18px 14px 50px; }
   .home-page { padding-top: 14px; }
   .banner-gate { border-radius: 10px; }
@@ -257,6 +298,9 @@ kbd { padding: 2px 6px; border: 1px solid var(--line); border-bottom-color: rgba
   .detail-hero__copy { padding: 27px 23px; }
   .detail-layout { grid-template-columns: 1fr; }
   .quiet-note { align-items: start; }
+  .verification-steps { grid-template-columns: 1fr; }
+  .profile-form > div { flex-direction: column; }
+  .profile-form input { min-height: 42px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

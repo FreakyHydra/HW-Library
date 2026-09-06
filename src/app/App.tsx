@@ -4,6 +4,8 @@ import { AssetDetailView } from '../views/AssetDetailView';
 import { CollectionView } from '../views/CollectionView';
 import { HomeView } from '../views/HomeView';
 import { NotFoundView } from '../views/NotFoundView';
+import { AccountView } from '../views/AccountView';
+import { VerificationView } from '../views/VerificationView';
 
 export function App() {
   return (
@@ -13,6 +15,8 @@ export function App() {
         <Route path="all" element={<CollectionView all />} />
         <Route path="library/:type" element={<CollectionView />} />
         <Route path="asset/:id" element={<AssetDetailView />} />
+        <Route path="account" element={<AccountView />} />
+        <Route path="verification" element={<VerificationView />} />
         <Route path="library" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFoundView />} />
       </Route>

@@ -1,14 +1,17 @@
-import { Menu, Search, Settings, X } from 'lucide-react';
+import { LogIn, Menu, Search, Settings, ShieldCheck, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { libraryNavigation } from '../app/library-nav';
 import { BrandMark } from './BrandMark';
+import { discordLoginPath, useAuth } from '../auth/AuthContext';
+import { UserAvatar } from './UserAvatar';
 
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
 
@@ -38,7 +41,7 @@ export function AppShell() {
         </nav>
         <div className="sidebar__footer">
           <div className="api-lamp"><span /> <small>Development archive</small></div>
-          <button className="sidebar__settings"><Settings size={17} /> Settings</button>
+          <NavLink className="sidebar__settings" to="/account"><Settings size={17} /> Account</NavLink>
         </div>
       </aside>
 
@@ -52,10 +55,15 @@ export function AppShell() {
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search every shelf..." aria-label="Search all of Orbis" />
             <kbd>Enter</kbd>
           </form>
-          <div className="keeper-badge" title="Coda is keeping watch">
-            <span className="keeper-badge__face">ᵔᴥᵔ</span>
-            <span><small>Archive keeper</small><strong>Coda</strong></span>
-          </div>
+          {user ? (
+            <NavLink className="keeper-badge keeper-badge--user" to="/account" title="Open your Orbis account">
+              <UserAvatar user={user} />
+              <span><small>{user.permissions.canCreate ? 'Verified creator' : 'SFW access'}</small><strong>{user.displayName}</strong></span>
+              {user.permissions.canCreate && <ShieldCheck className="keeper-badge__verified" size={15} />}
+            </NavLink>
+          ) : (
+            <a className={`discord-login ${authLoading ? 'is-loading' : ''}`} href={discordLoginPath(location.pathname)}><LogIn size={16} /><span>Sign in with Discord</span></a>
+          )}
         </header>
         <main className="content"><Outlet /></main>
       </div>

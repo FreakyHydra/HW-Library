@@ -11,6 +11,13 @@ export const assetTypes = [
 
 export type AssetType = (typeof assetTypes)[number];
 export type SourceType = 'curated' | 'user-created' | 'imported-v2' | 'copied' | 'public-curated' | 'legacy-import';
+export type ContentRating = 'sfw' | 'adult';
+
+export interface AssetAuthor {
+  id: string;
+  displayName: string;
+  avatarUrl?: string;
+}
 
 export interface LibraryAsset {
   id: string;
@@ -22,10 +29,14 @@ export interface LibraryAsset {
   createdAt: string;
   updatedAt: string;
   sourceType: SourceType;
+  contentRating?: ContentRating;
+  author?: AssetAuthor;
   tags: string[];
   dependencyCount: number;
   pinned?: boolean;
   visualTone: 'moon' | 'forest' | 'ember' | 'mist' | 'violet' | 'river';
+  restricted?: boolean;
+  verificationPath?: string;
 }
 
 export interface AssetQuery {
