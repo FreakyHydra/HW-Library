@@ -61,6 +61,8 @@ export const projects: Record<ProjectDefinition['slug'], ProjectDefinition> = {
       { question: 'Is it multiplayer?', answer: 'No. Shared-world presence belongs to Fabula.' },
       { question: 'Why the retro terminal design?', answer: 'Speculus is meant to feel like a personality simulation instrument rather than another modern chat dashboard.' },
       { question: 'What does Working Concept mean?', answer: 'A usable first version that proves the one-on-one RP, character loading, context and diagnostic workflow. It is not the final polished release.' },
+      { question: 'Do I have to wait for the countdown to try it?', answer: 'No. Demos, prototypes, test builds and semi-working versions may appear before the target date.' },
+      { question: 'Could Speculus release before the countdown ends?', answer: 'Yes. The date is a target, not a forced waiting period. If the working-concept milestone is ready early, it can release early.' },
     ],
   },
   fabula: {
@@ -99,6 +101,8 @@ export const projects: Record<ProjectDefinition['slug'], ProjectDefinition> = {
       { question: 'Does every world use the same rules?', answer: 'No. Each world can have its own authored rules, lore, locations and contribution controls.' },
       { question: 'Will Bitterroot be used in Fabula?', answer: 'Yes. Bitterroot is the natural first real world for testing the living-world architecture.' },
       { question: 'Why is Fabula later than Speculus?', answer: 'Fabula adds shared world state, locations, presence, privacy boundaries and much more persistence. Speculus gives it a proven RP foundation first.' },
+      { question: 'Do I have to wait for the countdown to see Fabula?', answer: 'No. Early demonstrations, partial world tests and semi-working builds may be shown before the Early Concept target.' },
+      { question: 'Could Fabula finish ahead of schedule?', answer: 'Yes. The countdown is a planning target. If the milestone is ready early, it can be released early.' },
     ],
   },
 };
