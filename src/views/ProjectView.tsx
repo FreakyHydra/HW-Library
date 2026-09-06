@@ -92,6 +92,7 @@ export function ProjectView() {
           <span className="project-target-date">{project.targetLabel}</span>
         </div>
         <Countdown project={project} />
+        <p className="project-release-note"><strong>Target date, not a lockout.</strong> Development is continuous. Demos, prototypes, test builds and semi-working versions may appear before the countdown ends. If the project reaches this milestone early, it may release ahead of schedule.</p>
         <div className="project-progress" aria-label={`${project.progress}% complete`}>
           <div className="project-progress__track"><span style={{ width: `${Math.max(0, Math.min(100, project.progress))}%` }} /></div>
           <div className="project-progress__labels"><span>Concept progress</span><strong>{project.progress}%</strong></div>
