@@ -5,10 +5,13 @@ This folder contains implementation and design specifications for Coda / Orbis a
 ## Legal
 
 - [Terms of Service](./TERMS_OF_SERVICE.md)  
-  Guest access, registered access, shared-content use, Fabula multiplayer eligibility, multiplayer fees, privacy boundaries and service access rules.
+  Guest access, registered access, shared-content use, Fabula multiplayer eligibility, multiplayer fees, privacy boundaries, AI-provider responsibilities and service access rules.
 
 - [End User License Agreement](./EULA.md)  
-  Software-use terms, ephemeral Speculus guest sessions, registered persistence, shared-content licensing and Fabula multiplayer conditions.
+  Software-use terms, ephemeral Speculus guest sessions, registered persistence, shared-content licensing, Fabula multiplayer conditions, provider behavior and local-model responsibilities.
+
+- [AI Providers and Model Policy](./AI_PROVIDERS_AND_MODEL_POLICY.md)  
+  Practical strengths, limitations, moderation differences, unexpected-output risks, provider obligations, gateways, user-supplied endpoints and personal local models.
 
 ## Fabula
 
