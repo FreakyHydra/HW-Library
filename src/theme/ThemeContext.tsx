@@ -18,11 +18,6 @@ function readStoredPreference(): ThemePreference {
   return stored === 'dark' || stored === 'light' || stored === 'auto' ? stored : 'auto';
 }
 
-function resolveTheme(preference: ThemePreference, media: MediaQueryList): ResolvedTheme {
-  if (preference === 'auto') return media.matches ? 'dark' : 'light';
-  return preference;
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(readStoredPreference);
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
