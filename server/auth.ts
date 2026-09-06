@@ -8,6 +8,8 @@ import { DiscordMembershipRequestError, discordAuthorizeUrl, discordAvatarUrl, d
 import type { SettingsStore } from './settings.js';
 import './types.js';
 
+export const SUPER_ADMIN_DISCORD_ID = '1544473372073791602';
+
 const profileSchema = z.object({ displayName: z.string().trim().min(2).max(40) });
 const ACCESS_MAX_AGE_MS = 5 * 60 * 1000;
 const ACCESS_RETRY_COOLDOWN_MS = 30 * 1000;
@@ -24,8 +26,13 @@ const safeEqual = (left: string, right: string) => {
 const safeReturnTo = (value: unknown) => typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/';
 
 const noAccess = { isGuildMember: false, canViewAdult: false, canCreate: false, canAdmin: false };
+const ownerAccess = () => {
+  const now = Date.now();
+  return { isGuildMember: true, canViewAdult: true, canCreate: true, canAdmin: true, checkedAt: now, verifiedAt: now };
+};
 
 function publicProfile(row: Record<string, unknown>, access: { isGuildMember: boolean; canViewAdult: boolean; canCreate: boolean; canAdmin: boolean }) {
+  const isSuperAdmin = String(row.discord_id ?? '') === SUPER_ADMIN_DISCORD_ID;
   return {
     id: row.id,
     displayName: row.display_name,
@@ -34,11 +41,12 @@ function publicProfile(row: Record<string, unknown>, access: { isGuildMember: bo
     avatarDecorationUrl: row.avatar_decoration_url,
     accentColor: row.accent_color,
     displayNameCustomized: row.display_name_customized,
+    isSuperAdmin,
     permissions: {
-      isGuildMember: access.isGuildMember,
-      canViewAdult: access.canViewAdult,
-      canCreate: access.canCreate,
-      canAdmin: access.canAdmin,
+      isGuildMember: isSuperAdmin ? true : access.isGuildMember,
+      canViewAdult: isSuperAdmin ? true : access.canViewAdult,
+      canCreate: isSuperAdmin ? true : access.canCreate,
+      canAdmin: isSuperAdmin ? true : access.canAdmin,
     },
   };
 }
@@ -61,8 +69,30 @@ async function evaluateDiscordAccess(accessToken: string, config: AppConfig, set
   return access;
 }
 
+export async function ensureSuperAdminAccess(request: Request, pool: DatabasePool): Promise<boolean> {
+  if (!request.session.userId) return false;
+
+  let discordUserId = request.session.discordUserId;
+  if (!discordUserId) {
+    const result = await pool.query('SELECT discord_id FROM users WHERE id = $1', [request.session.userId]);
+    if (!result.rowCount) return false;
+    discordUserId = String(result.rows[0].discord_id ?? '');
+    request.session.discordUserId = discordUserId;
+  }
+
+  if (discordUserId !== SUPER_ADMIN_DISCORD_ID) return false;
+  request.session.access = ownerAccess();
+  return true;
+}
+
 export async function refreshSessionAccess(request: Request, config: AppConfig, settingsStore: SettingsStore, force = false) {
-  if (!request.session.userId || !request.session.discordAccessToken) return;
+  if (!request.session.userId) return;
+  if (request.session.discordUserId === SUPER_ADMIN_DISCORD_ID) {
+    request.session.access = ownerAccess();
+    return;
+  }
+  if (!request.session.discordAccessToken) return;
+
   const now = Date.now();
   if (request.session.access && (request.session.access.retryAfter ?? 0) > now) return;
   if (!force && request.session.access && now - request.session.access.checkedAt < ACCESS_MAX_AGE_MS) return;
@@ -106,8 +136,9 @@ export async function refreshSessionAccess(request: Request, config: AppConfig, 
 export function requireCreator(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
-      await refreshSessionAccess(request, config, settingsStore);
-      if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to create in Orbis.' });
+      if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to create in Coda.' });
+      const isSuperAdmin = await ensureSuperAdminAccess(request, pool);
+      if (!isSuperAdmin) await refreshSessionAccess(request, config, settingsStore);
       if (!request.session.access?.canCreate) return response.status(403).json({ error: 'The verified 18+ Discord role is required to create or edit.', verificationPath: '/verification' });
       await pool.query(
         `UPDATE users SET is_guild_member = $2, can_view_adult = $3, can_create = $4, can_admin = $5, access_checked_at = now(), updated_at = now() WHERE id = $1`,
@@ -142,10 +173,11 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool, settings
 
       delete request.session.oauthState;
       const token = await exchangeCode(config, code);
-      const [discordUser, access] = await Promise.all([
+      const [discordUser, evaluatedAccess] = await Promise.all([
         getDiscordUser(token.access_token),
         evaluateDiscordAccess(token.access_token, config, settingsStore),
       ]);
+      const access = discordUser.id === SUPER_ADMIN_DISCORD_ID ? ownerAccess() : evaluatedAccess;
       const fallbackName = discordUser.global_name?.trim() || discordUser.username;
       const id = randomUUID();
       const result = await pool.query(
@@ -179,10 +211,11 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool, settings
       const returnTo = request.session.oauthReturnTo ?? '/';
       await new Promise<void>((resolve, reject) => request.session.regenerate((error) => error ? reject(error) : resolve()));
       request.session.userId = String(result.rows[0].id);
+      request.session.discordUserId = discordUser.id;
       request.session.discordAccessToken = token.access_token;
       request.session.discordTokenExpiresAt = Date.now() + token.expires_in * 1000;
       const checkedAt = Date.now();
-      request.session.access = { ...access, checkedAt, verifiedAt: checkedAt };
+      request.session.access = discordUser.id === SUPER_ADMIN_DISCORD_ID ? ownerAccess() : { ...evaluatedAccess, checkedAt, verifiedAt: checkedAt };
       request.session.save((error) => error ? next(error) : response.redirect(returnTo));
     } catch (error) {
       next(error);
@@ -192,9 +225,11 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool, settings
   router.get('/me', async (request, response, next) => {
     try {
       if (!request.session.userId) return response.json({ user: null });
-      await refreshSessionAccess(request, config, settingsStore);
       const result = await pool.query('SELECT * FROM users WHERE id = $1', [request.session.userId]);
       if (!result.rowCount) return response.json({ user: null });
+      request.session.discordUserId = String(result.rows[0].discord_id ?? '');
+      const isSuperAdmin = await ensureSuperAdminAccess(request, pool);
+      if (!isSuperAdmin) await refreshSessionAccess(request, config, settingsStore);
       const access = request.session.access ?? noAccess;
       response.json({ user: publicProfile(result.rows[0], access) });
     } catch (error) {
@@ -210,6 +245,8 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool, settings
         `UPDATE users SET display_name = $2, display_name_customized = true, updated_at = now() WHERE id = $1 RETURNING *`,
         [request.session.userId, body.displayName],
       );
+      request.session.discordUserId = String(result.rows[0].discord_id ?? '');
+      await ensureSuperAdminAccess(request, pool);
       const access = request.session.access ?? noAccess;
       response.json({ user: publicProfile(result.rows[0], access) });
     } catch (error) {
