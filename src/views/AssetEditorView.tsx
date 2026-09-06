@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { libraryApi } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { GenericAssetEditor } from '../components/GenericAssetEditor';
-import { StatePanel, ErrorState, LoadingState } from '../components/StatePanel';
+import { ErrorState, LoadingState } from '../components/StatePanel';
 import { WorldForgeEditor } from '../components/WorldForgeEditor';
 import { useLibraryData } from '../hooks/useLibraryData';
 
