@@ -15,8 +15,8 @@ export function AssetEditorView() {
   if (loading || authLoading) return <div className="page"><LoadingState label="Preparing the editor..." /></div>;
   if (error || !asset) return <div className="page"><ErrorState retry={retry} /></div>;
   if (!user) return <div className="page editor-denied"><CircleAlert /><h1>Sign in to edit</h1><p>Discord ownership protects every Coda record.</p></div>;
-  if (!user.permissions.canCreate) return <div className="page editor-denied"><CircleAlert /><h1>Verification required</h1><p>Your accepted Adult Access and creator roles are required before editing.</p><Link className="button button--primary" to="/verification">Open verification guide</Link></div>;
-  if (asset.author?.id !== user.id) return <div className="page editor-denied"><CircleAlert /><h1>Record protected</h1><p>Only {asset.author?.displayName ?? 'the original creator'} can change this record.</p><Link className="button button--secondary" to={`/asset/${asset.id}`}>Return to record</Link></div>;
+  if (!user.permissions.canCreate && !user.isSuperAdmin) return <div className="page editor-denied"><CircleAlert /><h1>Verification required</h1><p>Your accepted Adult Access and creator roles are required before editing.</p><Link className="button button--primary" to="/verification">Open verification guide</Link></div>;
+  if (asset.author?.id !== user.id && !user.isSuperAdmin) return <div className="page editor-denied"><CircleAlert /><h1>Record protected</h1><p>Only {asset.author?.displayName ?? 'the original creator'} can change this record.</p><Link className="button button--secondary" to={`/asset/${asset.id}`}>Return to record</Link></div>;
 
   return <div className="page editor-page">
     <Link className="back-link" to={`/asset/${asset.id}`}><ArrowLeft size={16} /> Back to record</Link>
