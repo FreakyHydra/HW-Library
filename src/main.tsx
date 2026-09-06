@@ -8,6 +8,7 @@ import '@fontsource/nunito-sans/600.css';
 import '@fontsource/nunito-sans/700.css';
 import { App } from './app/App';
 import { AuthProvider } from './auth/AuthContext';
+import { I18nProvider } from './i18n/I18nContext';
 import './styles/global.css';
 import './styles/project-etas.css';
 import './styles/project-pages.css';
@@ -17,7 +18,7 @@ import './styles/world-forge.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider><App /></AuthProvider>
+      <I18nProvider><AuthProvider><App /></AuthProvider></I18nProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );
