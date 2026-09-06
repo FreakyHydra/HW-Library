@@ -5,11 +5,14 @@ import { ensureSuperAdminAccess, refreshSessionAccess } from './auth.js';
 import { adminSettingsSchema, SettingsLockoutError, type SettingsStore } from './settings.js';
 import './types.js';
 
-export function requireAdmin(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
+export function requireAdmin(config: AppConfig, poolOrSettingsStore: DatabasePool | SettingsStore, maybeSettingsStore?: SettingsStore) {
+  const pool = maybeSettingsStore ? poolOrSettingsStore as DatabasePool : undefined;
+  const settingsStore = maybeSettingsStore ?? poolOrSettingsStore as SettingsStore;
+
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
       if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to administer Coda.' });
-      const isSuperAdmin = await ensureSuperAdminAccess(request, pool);
+      const isSuperAdmin = pool ? await ensureSuperAdminAccess(request, pool) : false;
       if (!isSuperAdmin) await refreshSessionAccess(request, config, settingsStore, true);
       if (!request.session.access?.canAdmin) return response.status(403).json({ error: 'Coda administrator access is required.' });
       next();
