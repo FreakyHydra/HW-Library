@@ -1,11 +1,19 @@
 import { BadgeCheck, LogIn, ShieldCheck, UserRoundCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { discordLoginPath, useAuth } from '../auth/AuthContext';
 
-const discordInviteUrl = (import.meta.env.VITE_DISCORD_INVITE_URL ?? '').trim();
+const fallbackDiscordInviteUrl = (import.meta.env.VITE_DISCORD_INVITE_URL ?? '').trim();
 
 export function VerificationView() {
   const { user } = useAuth();
+  const [discordInviteUrl, setDiscordInviteUrl] = useState(fallbackDiscordInviteUrl);
+  useEffect(() => {
+    fetch('/api/config/public', { headers: { Accept: 'application/json' } })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data: { discordInviteUrl?: string }) => setDiscordInviteUrl(data.discordInviteUrl?.trim() || fallbackDiscordInviteUrl))
+      .catch(() => undefined);
+  }, []);
   return (
     <div className="page verification-page">
       <section className="verification-panel">

@@ -12,6 +12,7 @@ export interface OrbisUser {
     isGuildMember: boolean;
     canViewAdult: boolean;
     canCreate: boolean;
+    canAdmin: boolean;
   };
 }
 

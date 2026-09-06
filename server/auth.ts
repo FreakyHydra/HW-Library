@@ -5,6 +5,8 @@ import { decideAccess } from './access.js';
 import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
 import { discordAuthorizeUrl, discordAvatarUrl, discordDecorationUrl, exchangeCode, getDiscordUser, getGuildMembership } from './discord.js';
+import type { SettingsStore } from './settings.js';
+import './types.js';
 
 const profileSchema = z.object({ displayName: z.string().trim().min(2).max(40) });
 const ACCESS_MAX_AGE_MS = 5 * 60 * 1000;
@@ -17,7 +19,9 @@ const safeEqual = (left: string, right: string) => {
 
 const safeReturnTo = (value: unknown) => typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') ? value : '/';
 
-function publicProfile(row: Record<string, unknown>, access: { isGuildMember: boolean; canViewAdult: boolean; canCreate: boolean }) {
+const noAccess = { isGuildMember: false, canViewAdult: false, canCreate: false, canAdmin: false };
+
+function publicProfile(row: Record<string, unknown>, access: { isGuildMember: boolean; canViewAdult: boolean; canCreate: boolean; canAdmin: boolean }) {
   return {
     id: row.id,
     displayName: row.display_name,
@@ -30,30 +34,47 @@ function publicProfile(row: Record<string, unknown>, access: { isGuildMember: bo
   };
 }
 
-export async function refreshSessionAccess(request: Request, config: AppConfig, force = false) {
+async function evaluateDiscordAccess(accessToken: string, config: AppConfig, settingsStore: SettingsStore) {
+  const settings = await settingsStore.getEffective();
+  const membership = settings.guildId
+    ? await getGuildMembership(accessToken, settings.guildId)
+    : { isGuildMember: false, roles: [] as string[] };
+  const access = decideAccess(membership.isGuildMember, membership.roles, {
+    adultRoleIds: new Set(settings.adultRoleIds), creatorRoleIds: new Set(settings.effectiveCreatorRoleIds),
+    adminRoleIds: new Set(settings.adminRoleIds), bootstrapAdminRoleIds: new Set(settings.bootstrapAdminRoleIds),
+  });
+
+  const recoveryGuildId = config.DISCORD_GUILD_ID;
+  if (!access.canAdmin && recoveryGuildId && recoveryGuildId !== settings.guildId && settings.bootstrapAdminRoleIds.length > 0) {
+    const recoveryMembership = await getGuildMembership(accessToken, recoveryGuildId);
+    access.canAdmin = recoveryMembership.isGuildMember && recoveryMembership.roles.some((role) => settings.bootstrapAdminRoleIds.includes(role));
+  }
+  return access;
+}
+
+export async function refreshSessionAccess(request: Request, config: AppConfig, settingsStore: SettingsStore, force = false) {
   if (!request.session.userId || !request.session.discordAccessToken) return;
   if (!force && request.session.access && Date.now() - request.session.access.checkedAt < ACCESS_MAX_AGE_MS) return;
   if ((request.session.discordTokenExpiresAt ?? 0) <= Date.now()) {
-    request.session.access = { isGuildMember: false, canViewAdult: false, canCreate: false, checkedAt: Date.now() };
+    request.session.access = { ...noAccess, checkedAt: Date.now() };
     return;
   }
   try {
-    const membership = await getGuildMembership(request.session.discordAccessToken, config.DISCORD_GUILD_ID);
-    request.session.access = { ...decideAccess(membership.isGuildMember, membership.roles, config), checkedAt: Date.now() };
+    request.session.access = { ...await evaluateDiscordAccess(request.session.discordAccessToken, config, settingsStore), checkedAt: Date.now() };
   } catch {
-    request.session.access = { isGuildMember: false, canViewAdult: false, canCreate: false, checkedAt: Date.now() };
+    request.session.access = { ...noAccess, checkedAt: Date.now() };
   }
 }
 
-export function requireCreator(config: AppConfig, pool: DatabasePool) {
+export function requireCreator(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
-      await refreshSessionAccess(request, config);
+      await refreshSessionAccess(request, config, settingsStore);
       if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to create in Orbis.' });
       if (!request.session.access?.canCreate) return response.status(403).json({ error: 'The verified 18+ Discord role is required to create or edit.', verificationPath: '/verification' });
       await pool.query(
-        `UPDATE users SET is_guild_member = $2, can_view_adult = $3, can_create = $4, access_checked_at = now(), updated_at = now() WHERE id = $1`,
-        [request.session.userId, request.session.access.isGuildMember, request.session.access.canViewAdult, request.session.access.canCreate],
+        `UPDATE users SET is_guild_member = $2, can_view_adult = $3, can_create = $4, can_admin = $5, access_checked_at = now(), updated_at = now() WHERE id = $1`,
+        [request.session.userId, request.session.access.isGuildMember, request.session.access.canViewAdult, request.session.access.canCreate, request.session.access.canAdmin],
       );
       next();
     } catch (error) {
@@ -62,7 +83,7 @@ export function requireCreator(config: AppConfig, pool: DatabasePool) {
   };
 }
 
-export function createAuthRouter(config: AppConfig, pool: DatabasePool) {
+export function createAuthRouter(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   const router = Router();
 
   router.get('/discord/login', (request, response, next) => {
@@ -84,19 +105,18 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool) {
 
       delete request.session.oauthState;
       const token = await exchangeCode(config, code);
-      const [discordUser, membership] = await Promise.all([
+      const [discordUser, access] = await Promise.all([
         getDiscordUser(token.access_token),
-        getGuildMembership(token.access_token, config.DISCORD_GUILD_ID),
+        evaluateDiscordAccess(token.access_token, config, settingsStore),
       ]);
-      const access = decideAccess(membership.isGuildMember, membership.roles, config);
       const fallbackName = discordUser.global_name?.trim() || discordUser.username;
       const id = randomUUID();
       const result = await pool.query(
         `INSERT INTO users (
           id, discord_id, discord_username, discord_global_name, display_name, avatar_url,
           avatar_decoration_url, banner_hash, accent_color, collectibles, primary_guild,
-          is_guild_member, can_view_adult, can_create
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+          is_guild_member, can_view_adult, can_create, can_admin
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         ON CONFLICT (discord_id) DO UPDATE SET
           discord_username = excluded.discord_username,
           discord_global_name = excluded.discord_global_name,
@@ -110,12 +130,13 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool) {
           is_guild_member = excluded.is_guild_member,
           can_view_adult = excluded.can_view_adult,
           can_create = excluded.can_create,
+          can_admin = excluded.can_admin,
           access_checked_at = now(), updated_at = now(), last_login_at = now()
         RETURNING *`,
         [id, discordUser.id, discordUser.username, discordUser.global_name, fallbackName,
           discordAvatarUrl(discordUser), discordDecorationUrl(discordUser), discordUser.banner ?? null,
           discordUser.accent_color ?? null, discordUser.collectibles ?? null, discordUser.primary_guild ?? null,
-          access.isGuildMember, access.canViewAdult, access.canCreate],
+          access.isGuildMember, access.canViewAdult, access.canCreate, access.canAdmin],
       );
 
       const returnTo = request.session.oauthReturnTo ?? '/';
@@ -133,10 +154,10 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool) {
   router.get('/me', async (request, response, next) => {
     try {
       if (!request.session.userId) return response.json({ user: null });
-      await refreshSessionAccess(request, config);
+      await refreshSessionAccess(request, config, settingsStore);
       const result = await pool.query('SELECT * FROM users WHERE id = $1', [request.session.userId]);
       if (!result.rowCount) return response.json({ user: null });
-      const access = request.session.access ?? { isGuildMember: false, canViewAdult: false, canCreate: false };
+      const access = request.session.access ?? noAccess;
       response.json({ user: publicProfile(result.rows[0], access) });
     } catch (error) {
       next(error);
@@ -151,7 +172,7 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool) {
         `UPDATE users SET display_name = $2, display_name_customized = true, updated_at = now() WHERE id = $1 RETURNING *`,
         [request.session.userId, body.displayName],
       );
-      const access = request.session.access ?? { isGuildMember: false, canViewAdult: false, canCreate: false };
+      const access = request.session.access ?? noAccess;
       response.json({ user: publicProfile(result.rows[0], access) });
     } catch (error) {
       next(error);

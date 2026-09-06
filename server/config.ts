@@ -11,26 +11,28 @@ const envSchema = z.object({
   DISCORD_CLIENT_ID: z.string().min(1),
   DISCORD_CLIENT_SECRET: z.string().min(1),
   DISCORD_REDIRECT_URI: z.string().url(),
-  DISCORD_GUILD_ID: z.string().regex(/^\d+$/),
+  DISCORD_GUILD_ID: z.string().regex(/^$|^\d{17,20}$/).default(''),
   DISCORD_ADULT_ROLE_IDS: z.string().default(''),
   DISCORD_CREATOR_ROLE_IDS: z.string().default(''),
+  DISCORD_ADMIN_ROLE_IDS: z.string().default(''),
+  DISCORD_BOOTSTRAP_ADMIN_ROLE_IDS: z.string().default(''),
+  DISCORD_INVITE_URL: z.string().default(''),
+  VITE_DISCORD_INVITE_URL: z.string().default(''),
+  ORBIS_VERSION: z.string().default('0.2.0'),
+  ORBIS_BUILD_SHA: z.string().default(''),
 });
 
-const parseRoleIds = (value: string) => new Set(value.split(',').map((id) => id.trim()).filter(Boolean));
+export const parseRoleIds = (value: string) => [...new Set(value.split(',').map((id) => id.trim()).filter(Boolean))];
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env) {
   const env = envSchema.parse(environment);
-  const adultRoleIds = parseRoleIds(env.DISCORD_ADULT_ROLE_IDS);
-  const configuredCreatorRoleIds = parseRoleIds(env.DISCORD_CREATOR_ROLE_IDS);
-  const creatorRoleIds = configuredCreatorRoleIds.size > 0 ? configuredCreatorRoleIds : adultRoleIds;
-
-  if (adultRoleIds.size === 0) throw new Error('DISCORD_ADULT_ROLE_IDS must contain at least one role ID.');
-  if (creatorRoleIds.size === 0) throw new Error('DISCORD_CREATOR_ROLE_IDS or DISCORD_ADULT_ROLE_IDS must contain at least one role ID.');
-
   return {
     ...env,
-    adultRoleIds,
-    creatorRoleIds,
+    envAdultRoleIds: parseRoleIds(env.DISCORD_ADULT_ROLE_IDS),
+    envCreatorRoleIds: parseRoleIds(env.DISCORD_CREATOR_ROLE_IDS),
+    envAdminRoleIds: parseRoleIds(env.DISCORD_ADMIN_ROLE_IDS),
+    bootstrapAdminRoleIds: parseRoleIds(env.DISCORD_BOOTSTRAP_ADMIN_ROLE_IDS),
+    envDiscordInviteUrl: env.DISCORD_INVITE_URL || env.VITE_DISCORD_INVITE_URL,
     isProduction: env.NODE_ENV === 'production',
     trustProxy: env.TRUST_PROXY === 'true',
   };

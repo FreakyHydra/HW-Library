@@ -12,7 +12,8 @@ The `HW-Library` repository contains the user-facing Orbis frontend and its Libr
 - Curated Howling Whispers data first
 - Project Whispers simulation launch integration later
 - Rebrand integration later
-- Authentication and mailing later
+- Discord authentication, ownership and verified-access controls
+- Protected Orbis administration and PostgreSQL-backed operational settings
 
 ## Branch model
 
@@ -40,7 +41,7 @@ npm run dev
 
 The development server opens on `http://localhost:5174`.
 
-Leave `VITE_HW_LIBRARY_API_URL` blank to use the temporary frontend fixtures. Set it to the shared API origin when the real Global Asset Index API is available.
+Leave `VITE_HW_LIBRARY_API_URL` blank to use the temporary frontend fixtures. Run `npm run dev:api` separately when developing the PostgreSQL-backed API and administration area.
 
 ## Verification
 
@@ -59,4 +60,7 @@ The production preview opens on `http://localhost:4174`. Deployment, DNS, revers
 - `src/features/library` contains temporary frontend fixtures.
 - `src/views` contains the Library home, collections and record detail views.
 - `src/types` contains shared asset and future simulation launch contracts.
+- `src/admin` and `src/views/AdminView.tsx` contain the protected administration client.
+- `server` contains Discord OAuth, access policy, settings, audit and Library endpoints.
 - `docs/API_CONTRACT.md` documents the initial server contract.
+- `docs/ADMINISTRATION.md` documents configuration precedence, recovery and deployment requirements.

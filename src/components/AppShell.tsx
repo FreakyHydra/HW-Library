@@ -1,4 +1,4 @@
-import { LogIn, Menu, Search, Settings, ShieldCheck, X } from 'lucide-react';
+import { LogIn, Menu, Search, Settings, ShieldCheck, SlidersHorizontal, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { libraryNavigation } from '../app/library-nav';
@@ -41,6 +41,7 @@ export function AppShell() {
         </nav>
         <div className="sidebar__footer">
           <div className="api-lamp"><span /> <small>Development archive</small></div>
+          {user?.permissions.canAdmin && <NavLink className="sidebar__settings" to="/admin"><SlidersHorizontal size={17} /> Administration</NavLink>}
           <NavLink className="sidebar__settings" to="/account"><Settings size={17} /> Account</NavLink>
         </div>
       </aside>

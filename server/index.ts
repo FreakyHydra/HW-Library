@@ -6,13 +6,16 @@ import session from 'express-session';
 import helmet from 'helmet';
 import { ZodError } from 'zod';
 import { createAuthRouter } from './auth.js';
+import { createAdminRouter, requireAdmin } from './admin.js';
 import { loadConfig } from './config.js';
 import { createPool } from './db.js';
 import { createLibraryRouter } from './library.js';
+import { PostgresSettingsStore } from './settings.js';
 import './types.js';
 
 const config = loadConfig();
 const pool = createPool(config.DATABASE_URL);
+const settingsStore = new PostgresSettingsStore(pool, config);
 const PgStore = connectPgSimple(session);
 const app = express();
 
@@ -45,8 +48,15 @@ app.get('/api/health', async (_request, response, next) => {
     next(error);
   }
 });
-app.use('/api/auth', createAuthRouter(config, pool));
-app.use('/api/v1/library', createLibraryRouter(config, pool));
+app.get('/api/config/public', async (_request, response, next) => {
+  try {
+    const settings = await settingsStore.getEffective();
+    response.json({ discordInviteUrl: settings.inviteUrl });
+  } catch (error) { next(error); }
+});
+app.use('/api/auth', createAuthRouter(config, pool, settingsStore));
+app.use('/api/admin', requireAdmin(config, settingsStore), createAdminRouter(config, pool, settingsStore));
+app.use('/api/v1/library', createLibraryRouter(config, pool, settingsStore));
 
 if (config.isProduction) {
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url));

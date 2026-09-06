@@ -6,6 +6,7 @@ import { HomeView } from '../views/HomeView';
 import { NotFoundView } from '../views/NotFoundView';
 import { AccountView } from '../views/AccountView';
 import { VerificationView } from '../views/VerificationView';
+import { AdminView } from '../views/AdminView';
 
 export function App() {
   return (
@@ -17,6 +18,7 @@ export function App() {
         <Route path="asset/:id" element={<AssetDetailView />} />
         <Route path="account" element={<AccountView />} />
         <Route path="verification" element={<VerificationView />} />
+        <Route path="admin" element={<AdminView />} />
         <Route path="library" element={<Navigate to="/" replace />} />
         <Route path="*" element={<NotFoundView />} />
       </Route>

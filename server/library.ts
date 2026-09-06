@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { refreshSessionAccess, requireCreator } from './auth.js';
 import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
+import type { SettingsStore } from './settings.js';
 
 const assetTypes = ['world', 'character', 'place', 'faction', 'species', 'society', 'family', 'memory'] as const;
 const sourceTypes = ['curated', 'user-created', 'imported-v2', 'copied', 'public-curated', 'legacy-import'] as const;
@@ -70,12 +71,12 @@ const selectAssets = `
   LEFT JOIN library_assets origin ON origin.id = a.origin_world_id
   LEFT JOIN users u ON u.id = a.creator_user_id`;
 
-export function createLibraryRouter(config: AppConfig, pool: DatabasePool) {
+export function createLibraryRouter(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   const router = Router();
 
   router.use(async (request, _response, next) => {
     try {
-      await refreshSessionAccess(request, config);
+      await refreshSessionAccess(request, config, settingsStore);
       next();
     } catch (error) {
       next(error);
@@ -132,7 +133,7 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool) {
     }
   });
 
-  router.post('/assets', requireCreator(config, pool), async (request, response, next) => {
+  router.post('/assets', requireCreator(config, pool, settingsStore), async (request, response, next) => {
     try {
       const asset = createAssetSchema.parse(request.body);
       const result = await pool.query(
@@ -146,7 +147,7 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool) {
     }
   });
 
-  router.patch('/assets/:id', requireCreator(config, pool), async (request, response, next) => {
+  router.patch('/assets/:id', requireCreator(config, pool, settingsStore), async (request, response, next) => {
     try {
       const asset = updateAssetSchema.parse(request.body);
       const current = await pool.query('SELECT * FROM library_assets WHERE id = $1', [request.params.id]);

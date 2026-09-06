@@ -4,6 +4,7 @@ export interface SessionAccess {
   isGuildMember: boolean;
   canViewAdult: boolean;
   canCreate: boolean;
+  canAdmin: boolean;
   checkedAt: number;
 }
 

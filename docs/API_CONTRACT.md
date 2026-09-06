@@ -34,3 +34,17 @@ Every asset has a `contentRating` of `sfw` or `adult`. When the current session 
 | `PATCH` | `/v1/library/assets/:id` | Accepted Discord creator role and matching immutable creator ID |
 
 Records store `creator_user_id`. Responses join that ID to the creator's current profile, keeping visible author names fluid without weakening ownership.
+
+## Administration
+
+All routes below require a signed-in Discord user with effective Orbis administrator access. Server-side middleware enforces authorization.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/admin/overview` | Non-secret operational and system status |
+| `GET` | `/api/admin/settings` | Effective editable settings, source and fallback information |
+| `PUT` | `/api/admin/settings` | Validate, persist and audit a complete operational settings update |
+| `GET` | `/api/admin/audit` | Recent non-secret setting changes |
+| `GET` | `/api/config/public` | Public Discord invite URL only |
+
+The administration API never returns `DATABASE_URL`, `SESSION_SECRET` or `DISCORD_CLIENT_SECRET` values.
