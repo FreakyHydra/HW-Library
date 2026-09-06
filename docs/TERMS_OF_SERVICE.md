@@ -38,25 +38,23 @@ A registered user who is not a member of The Howling Whispers Discord server may
 
 Fabula multiplayer and shared user-presence features are community features.
 
-Access to Fabula multiplayer requires:
+Access may require:
 
 1. a registered account;
 2. membership in The Howling Whispers Discord server; and
-3. any applicable multiplayer access entitlement or subscription then required by the service.
+3. any applicable multiplayer entitlement or subscription then required by the service.
 
 Users who do not meet these requirements may still use eligible shared or public content privately where permitted, but may not participate in multiplayer presence, shared user scenes or other community-gated multiplayer functionality.
 
-## 4. Multiplayer access fees
+## 4. Payments, cancellation and refunds
 
-The Howling Whispers may charge a small recurring or fixed fee for Fabula multiplayer access.
+Any price, billing period, renewal term and eligibility condition will be shown before purchase.
 
-The purpose of such a fee may include supporting hosting, synchronization, moderation, persistent shared-world infrastructure, abuse prevention and continued development.
+Used service periods are generally non-refundable except where The Howling Whispers expressly promises otherwise or applicable law requires a refund or withdrawal right.
 
-Any multiplayer price, billing period and renewal terms will be shown before purchase.
+Mandatory consumer rights are not waived by a 'no refunds' statement.
 
-Payment for multiplayer access does not replace the Discord server membership requirement unless The Howling Whispers explicitly states otherwise.
-
-The existence of a paid multiplayer tier does not mean that ordinary private use of eligible shared content must be paid.
+See `PAYMENTS_REFUNDS_AND_CANCELLATION.md` for the detailed policy.
 
 ## 5. Shared content and private roleplay
 
@@ -66,59 +64,87 @@ Permission to use a public or shared character, world, location or other asset i
 
 Private roleplay remains separate from multiplayer presence unless the user deliberately enters or joins a shared scene.
 
-## 6. Multiplayer privacy
+## 6. User responsibility
+
+Users are responsible for their own prompts, uploads, publications, roleplay choices, shared-scene conduct, use of external endpoints and other intentional actions carried out through their account.
+
+The fact that a feature, character, world or AI model is available does not mean every possible use is lawful.
+
+Users must comply with applicable law and with the policies that apply to the service or selected provider.
+
+The Howling Whispers does not authorize unlawful conduct by providing general-purpose roleplay tools, fictional characters, worlds, model connections or server infrastructure.
+
+## 7. Fictional minor characters
+
+The service may include fictional minor characters for legitimate narrative purposes such as family relationships, childhood development, genealogy, history and world simulation.
+
+Their presence is not an invitation, authorization or endorsement of unlawful sexual exploitation material or other unlawful use.
+
+Users are responsible for ensuring that their conduct involving fictional minor characters complies with the law applicable to them and the service.
+
+## 8. Unexpected AI output
+
+AI output is probabilistic and can be unpredictable.
+
+A model may produce explicit, violent, disturbing, offensive, inaccurate, unlawful-looking or otherwise unwanted material that the user did not request.
+
+Unexpected generation does not automatically prove user intent or endorsement.
+
+However, users must not intentionally continue, preserve, publish, distribute or exploit unlawful material once they are aware of it.
+
+## 9. AI providers and user-supplied models
+
+The Howling Whispers may support third-party AI providers, gateways, local models and user-supplied endpoints.
+
+Each provider or model may have different rules, limitations, privacy practices, licensing terms and output characteristics.
+
+Provider rules continue to apply when that provider is selected.
+
+Users who configure their own local model or remote endpoint are responsible for its license, legality, endpoint security, privacy, logging and operation.
+
+See `AI_PROVIDERS_AND_MODEL_POLICY.md`.
+
+## 10. Multiplayer privacy
 
 Being present in the same Fabula world or location as another user does not grant access to that user's private AI conversations.
 
-Users may be able to see limited presence information about other eligible users in the same location, but private prompts, AI replies, private memories, author notes, hidden context, private branches and unrelated session history are not shared merely because users occupy the same location.
+Users may be able to see limited presence information about other eligible users in the same location, but private prompts, AI replies, memories, author notes, hidden context, branches and unrelated session history are not shared merely because users occupy the same location.
 
 Shared scenes require deliberate participation according to the multiplayer system in use.
 
-## 7. AI providers, models and generated output
+## 11. Acceptable use
 
-The Howling Whispers may support multiple AI providers, model vendors, third-party gateways, user-supplied remote endpoints and personally operated local models.
+Users must not intentionally misuse the service for unlawful activity, fraud, harassment, stalking, privacy invasion, malware distribution, unauthorized access, intellectual-property infringement, ban evasion, exploitation or other prohibited conduct described in `ACCEPTABLE_USE_POLICY.md`.
 
-Each provider or model may have different strengths, limitations, moderation behavior, privacy characteristics, costs and acceptable-use requirements.
+Serious or repeated violations may result in content restrictions, feature restrictions, multiplayer removal, suspension or account termination.
 
-Users are responsible for complying with the current terms, rules, licenses and restrictions of the provider or model they choose to use.
+## 12. User content and intellectual property
 
-A feature, character, world or scene being permitted by The Howling Whispers does not guarantee that every external AI provider will accept or generate it. A provider may refuse, filter, alter, restrict or otherwise handle a request according to its own rules.
+Users remain responsible for having the rights needed for content they upload or publish.
 
-Likewise, a model may produce unexpected output, including inaccurate canon, offensive language, graphic violence, sexual or explicit material, disturbing themes, hallucinated facts or other content the user did not specifically request.
+The Howling Whispers receives only the operational license reasonably needed to store, display, process and make content available according to the user's chosen visibility and service features.
 
-No generative model is guaranteed to behave identically between providers, model versions, prompts or configurations.
+See `CONTENT_AND_IP_POLICY.md`.
 
-The current provider guidance, including practical strengths and risks for NovelAI, OpenAI, Anthropic, Gemini, Mistral-family models, gateways and personally operated local models, is documented in [AI Providers and Model Policy](./AI_PROVIDERS_AND_MODEL_POLICY.md), which forms part of these service rules where applicable.
+## 13. Illegal-content reports and legal process
 
-## 8. Personally operated and user-supplied models
+The Howling Whispers may review reports of allegedly illegal content, restrict or remove content where appropriate, preserve relevant records and respond to valid and binding legal process.
 
-Where the service allows a user to connect a local model, personally controlled server or user-supplied remote endpoint, the user is responsible for that endpoint and its operation.
+A report is not automatic proof of wrongdoing.
 
-This includes responsibility for:
+Where practical and lawful, affected users should receive notice and an opportunity to appeal moderation decisions.
 
-- complying with the applicable model license;
-- complying with applicable law;
-- securing the endpoint and credentials;
-- understanding whether the endpoint logs or retains prompts and generated content;
-- understanding the policies of any third-party host used to run the model;
-- paying charges billed by the user's chosen provider or hosting service; and
-- accepting that local or third-party models may provide little or no provider-side moderation.
+See `ILLEGAL_CONTENT_AND_LEGAL_REQUESTS.md`.
 
-The Howling Whispers cannot guarantee the privacy, security, model identity, availability or content policy of a user-supplied endpoint.
+## 14. Account compromise
 
-Connecting to such an endpoint does not make The Howling Whispers the operator of that model.
+Activity recorded on an account may not always have been performed by the legitimate account owner.
 
-## 9. Provider credentials and third-party services
+Where compromise is suspected, The Howling Whispers may invalidate sessions, restrict the account, preserve security records and require re-verification.
 
-Where users provide their own API keys or credentials, they remain responsible for their provider account and any charges incurred through it.
+Users should promptly report suspected compromise.
 
-Users must not intentionally provide credentials they are not authorized to use.
-
-The Howling Whispers may remove, disable or change a provider integration when necessary because of policy changes, technical incompatibility, security concerns, privacy concerns, pricing changes, provider shutdowns or other operational reasons.
-
-Provider-specific terms may change independently of these Terms of Service. Users should review the current rules of their selected provider when those rules materially affect their intended use.
-
-## 10. Community access and moderation
+## 15. Community access and moderation
 
 Membership in The Howling Whispers Discord server may be required for community-gated features, including Fabula multiplayer.
 
@@ -126,26 +152,75 @@ Loss of server membership, suspension, removal, moderation action or loss of an 
 
 Where technically possible, loss of multiplayer eligibility does not by itself remove access to ordinary private roleplay features that the user is otherwise entitled to use.
 
-## 11. Service changes
+See `COMMUNITY_AND_MULTIPLAYER_RULES.md`.
+
+## 16. Privacy and data retention
+
+Personal data is handled according to `PRIVACY_POLICY.md` and the service's data-retention practices.
+
+Guest sessions are intentionally non-persistent, but temporary technical processing may still occur for delivery, security and reliability.
+
+The service may preserve specific records where reasonably necessary for billing, fraud prevention, moderation, legal claims or binding legal process.
+
+See `DATA_RETENTION_AND_DELETION.md`.
+
+## 17. Jurisdiction and applicable law
+
+The service may be affected by more than one jurisdiction.
+
+Relevant law may include the law applicable to the operator, German law where hosting or conduct creates a relevant connection, European Union law, and law applicable to a user's own location or conduct.
+
+The physical location of a server is not the sole test for every legal question.
+
+Users remain responsible for legal requirements that apply specifically to them.
+
+Nothing in these Terms authorizes conduct that is unlawful under applicable law.
+
+## 18. Indemnity for user wrongdoing
+
+To the extent permitted by applicable law, a user is responsible for losses, claims, liabilities and reasonable costs arising from that user's unlawful conduct, infringement, unauthorized uploads, fraud or other material breach of these Terms.
+
+Nothing in this clause requires a consumer to indemnify The Howling Whispers for responsibility that applicable law places on The Howling Whispers itself, or where such a clause would be unenforceable under mandatory consumer law.
+
+## 19. Limitation of liability
+
+To the maximum extent permitted by applicable law, The Howling Whispers is not responsible for indirect or consequential losses caused solely by user misconduct, third-party provider failures, user-selected endpoints, unexpected AI output, unauthorized third-party content or service interruptions outside reasonable control.
+
+Nothing in these Terms excludes liability that cannot legally be excluded, including mandatory consumer rights or other non-waivable liability.
+
+## 20. Service changes and availability
 
 The Howling Whispers is under active development.
 
-Features, access requirements, prices, storage behavior, limits, providers, models and service availability may change over time.
-
-Material changes to paid access or these terms should be presented through the service or other reasonable notice where required.
-
-## 12. Availability and data
-
-The service is provided subject to availability.
-
-Users should not rely on guest sessions as permanent storage. Guest data is intentionally non-persistent.
-
-Registered users should also maintain copies of important authored content where export functionality is available.
+Features, access requirements, prices, storage behavior, providers, limits and service availability may change over time.
 
 No service can guarantee uninterrupted availability or permanent retention in every circumstance.
 
-## 13. Acceptance
+Registered users should maintain copies of important authored content where export functionality is available.
 
-By accessing or using The Howling Whispers services, you agree to these Terms of Service, the applicable AI provider/model rules, and any additional rules that apply to the specific feature, world, community area or paid service you choose to use.
+## 21. Severability
 
-Where mandatory consumer or privacy law gives you rights that cannot legally be waived by these terms, those rights remain unaffected.
+If one part of these Terms is found invalid or unenforceable, the remaining provisions continue to apply to the extent legally possible.
+
+## 22. Acceptance
+
+By accessing or using The Howling Whispers services, you agree to these Terms of Service and the incorporated policies that apply to the feature you use.
+
+Where mandatory consumer, privacy or other law gives you rights that cannot legally be waived by these Terms, those rights remain unaffected.
+
+## 23. Related policies
+
+These Terms should be read together with:
+
+- `EULA.md`
+- `PRIVACY_POLICY.md`
+- `ACCEPTABLE_USE_POLICY.md`
+- `AI_PROVIDERS_AND_MODEL_POLICY.md`
+- `COMMUNITY_AND_MULTIPLAYER_RULES.md`
+- `CONTENT_AND_IP_POLICY.md`
+- `ILLEGAL_CONTENT_AND_LEGAL_REQUESTS.md`
+- `PAYMENTS_REFUNDS_AND_CANCELLATION.md`
+- `COOKIE_AND_LOCAL_STORAGE_POLICY.md`
+- `DATA_RETENTION_AND_DELETION.md`
+
+This is a legal draft and should receive professional review before commercial public launch.
