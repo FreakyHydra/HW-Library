@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Router, type Request } from 'express';
 import { z } from 'zod';
-import { refreshSessionAccess, requireCreator } from './auth.js';
+import { ensureSuperAdminAccess, refreshSessionAccess, requireCreator, SUPER_ADMIN_DISCORD_ID } from './auth.js';
 import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
 import type { SettingsStore } from './settings.js';
@@ -80,7 +80,8 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
 
   router.use(async (request, _response, next) => {
     try {
-      await refreshSessionAccess(request, config, settingsStore);
+      const isSuperAdmin = await ensureSuperAdminAccess(request, pool);
+      if (!isSuperAdmin) await refreshSessionAccess(request, config, settingsStore);
       next();
     } catch (error) {
       next(error);
@@ -156,7 +157,8 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
       const asset = updateAssetSchema.parse(request.body);
       const current = await pool.query('SELECT * FROM library_assets WHERE id = $1', [request.params.id]);
       if (!current.rowCount) return response.status(404).json({ error: 'Record not found.' });
-      if (current.rows[0].creator_user_id !== request.session.userId) return response.status(403).json({ error: 'Only the creator can change this record.' });
+      const isSuperAdmin = request.session.discordUserId === SUPER_ADMIN_DISCORD_ID;
+      if (current.rows[0].creator_user_id !== request.session.userId && !isSuperAdmin) return response.status(403).json({ error: 'Only the creator can change this record.' });
       const nextAsset = { ...current.rows[0], ...{
         name: asset.name ?? current.rows[0].name,
         summary: asset.summary ?? current.rows[0].summary,
@@ -175,8 +177,8 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
          WHERE id=$1 RETURNING *`,
         [request.params.id, nextAsset.name, nextAsset.summary, nextAsset.origin_world_id, nextAsset.content_rating, nextAsset.tags, nextAsset.visual_tone, JSON.stringify(nextAsset.document)],
       );
-      const user = await pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [request.session.userId]);
-      response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: user.rows[0].display_name, author_avatar_url: user.rows[0].avatar_url }));
+      const author = await pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [current.rows[0].creator_user_id]);
+      response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: author.rows[0]?.display_name, author_avatar_url: author.rows[0]?.avatar_url }));
     } catch (error) {
       next(error);
     }
