@@ -8,6 +8,7 @@ import { AccountView } from '../views/AccountView';
 import { VerificationView } from '../views/VerificationView';
 import { AdminView } from '../views/AdminView';
 import { AssetEditorView } from '../views/AssetEditorView';
+import { ProjectView } from '../views/ProjectView';
 
 export function App() {
   return (
@@ -18,6 +19,7 @@ export function App() {
         <Route path="library/:type" element={<CollectionView />} />
         <Route path="asset/:id" element={<AssetDetailView />} />
         <Route path="asset/:id/edit" element={<AssetEditorView />} />
+        <Route path="projects/:slug" element={<ProjectView />} />
         <Route path="account" element={<AccountView />} />
         <Route path="verification" element={<VerificationView />} />
         <Route path="admin" element={<AdminView />} />
