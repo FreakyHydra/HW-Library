@@ -22,11 +22,20 @@ export function HomeView() {
   const { data, error, loading, retry } = useLibraryData((signal) => libraryApi.getOverview(signal));
   const { locale } = useI18n();
   const de = locale === 'de';
+  const bannerSrc = de ? '/assets/orbis-banner-de.webp' : '/assets/orbis-banner.webp';
 
   return (
     <div className="page home-page">
-      <section className="banner-gate" aria-label={de ? 'Willkommen bei Coda, der Bibliothek von Howling Whispers' : 'Welcome to Coda, the Library of Howling Whispers'}>
-        <img src="/assets/orbis-banner.webp" alt={de ? 'Coda heißt dich in der Bibliothek von Howling Whispers willkommen' : 'Coda welcomes you to the Library of Howling Whispers'} />
+      <section className="banner-gate" aria-label={de ? 'Willkommen bei Orbis, der Bibliothek von Howling Whispers' : 'Welcome to Orbis, the Library of Howling Whispers'}>
+        <img
+          key={bannerSrc}
+          src={bannerSrc}
+          alt={de ? 'Coda heißt dich bei Orbis, der Bibliothek von Howling Whispers, willkommen' : 'Coda welcomes you to Orbis, the Library of Howling Whispers'}
+          onError={(event) => {
+            if (event.currentTarget.src.endsWith('/assets/orbis-banner.webp')) return;
+            event.currentTarget.src = '/assets/orbis-banner.webp';
+          }}
+        />
       </section>
 
       <section className="section-block" id="shelves">
