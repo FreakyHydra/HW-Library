@@ -9,6 +9,7 @@
     "build": "npm run build:web && npm run build:api",
     "build:web": "tsc -b && vite build",
     "build:api": "tsc -p server/tsconfig.json",
+    "import:bitterroot": "node dist-server/import-bitterroot.js",
     "start:api": "node dist-server/index.js",
     "preview": "vite preview",
     "test": "vitest run",

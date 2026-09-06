@@ -37,6 +37,17 @@ export interface LibraryAsset {
   visualTone: 'moon' | 'forest' | 'ember' | 'mist' | 'violet' | 'river';
   restricted?: boolean;
   verificationPath?: string;
+  sourceAssetId?: string;
+  document?: Record<string, unknown>;
+}
+
+export interface LibraryAssetUpdate {
+  name: string;
+  summary: string;
+  contentRating: ContentRating;
+  tags: string[];
+  visualTone: LibraryAsset['visualTone'];
+  document: Record<string, unknown>;
 }
 
 export interface AssetQuery {

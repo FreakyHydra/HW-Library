@@ -16,7 +16,7 @@ Supported asset query parameters are `type`, `search`, `sourceType` and `sort`.
 
 ## Stable frontend models
 
-- `LibraryAsset` provides common identity, provenance, origin world, tags and dependency summary fields.
+- `LibraryAsset` provides common identity, provenance, origin world, tags, dependency summary fields and a structured `document`.
 - `AssetQuery` defines the first global index query surface.
 - `SimulationTarget` reserves the dormant boundary for Project Whispers without coupling this site to a runtime.
 
@@ -34,6 +34,14 @@ Every asset has a `contentRating` of `sfw` or `adult`. When the current session 
 | `PATCH` | `/v1/library/assets/:id` | Accepted Discord creator role and matching immutable creator ID |
 
 Records store `creator_user_id`. Responses join that ID to the creator's current profile, keeping visible author names fluid without weakening ownership.
+
+The PATCH endpoint updates both the common Library card and the structured document. Stable source IDs are not editable. The Orbis editor is available at `/asset/:id/edit` only to a verified creator whose immutable Orbis user ID matches the record owner. The API repeats both checks server-side.
+
+## Bitterroot source import
+
+`server/data/bitterroot.json` is the canonical public Bitterroot snapshot imported from the Rebrand branch. `npm run import:bitterroot` creates 28 records with `source_type = public-curated`, stable `source_asset_id` values, and the Bitterroot world as the origin for every child record.
+
+Every Bitterroot record belongs to the Orbis user whose immutable Discord ID is `1544473372073791602`. The displayed author name and avatar continue resolving from that user's current Orbis profile. The import uses insert-only conflict handling, so rerunning it never overwrites an existing record or an editor change.
 
 ## Administration
 

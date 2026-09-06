@@ -1,6 +1,6 @@
 import type { LibraryApi } from './contracts';
 import { LibraryApiError } from './contracts';
-import type { AssetListResponse, AssetQuery, LibraryAsset, LibraryOverview } from '../types/library';
+import type { AssetListResponse, AssetQuery, LibraryAsset, LibraryAssetUpdate, LibraryOverview } from '../types/library';
 
 export class HttpLibraryApi implements LibraryApi {
   constructor(private readonly baseUrl: string) {}
@@ -33,5 +33,16 @@ export class HttpLibraryApi implements LibraryApi {
 
   getAsset(id: string, signal?: AbortSignal) {
     return this.request<LibraryAsset>(`/v1/library/assets/${encodeURIComponent(id)}`, signal);
+  }
+
+  async updateAsset(id: string, update: LibraryAssetUpdate) {
+    const response = await fetch(`${this.baseUrl}/v1/library/assets/${encodeURIComponent(id)}`, {
+      method: 'PATCH', credentials: 'include',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(update),
+    });
+    const data = await response.json() as LibraryAsset & { error?: string };
+    if (!response.ok) throw new LibraryApiError(data.error ?? `Library request failed with status ${response.status}.`, response.status);
+    return data;
   }
 }

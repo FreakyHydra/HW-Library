@@ -11,7 +11,7 @@ The `HW-Library` repository contains the user-facing Orbis frontend and its Libr
 - Reusable Characters, Places, Factions, Species, Societies, Families, Memories, and Worlds
 - Curated Howling Whispers data first
 - Project Whispers simulation launch integration later
-- Rebrand integration later
+- Canonical Bitterroot import from Rebrand
 - Discord authentication, ownership and verified-access controls
 - Protected Orbis administration and PostgreSQL-backed operational settings
 
@@ -62,5 +62,18 @@ The production preview opens on `http://localhost:4174`. Deployment, DNS, revers
 - `src/types` contains shared asset and future simulation launch contracts.
 - `src/admin` and `src/views/AdminView.tsx` contain the protected administration client.
 - `server` contains Discord OAuth, access policy, settings, audit and Library endpoints.
+- `server/data/bitterroot.json` contains the canonical Bitterroot source snapshot from Rebrand.
 - `docs/API_CONTRACT.md` documents the initial server contract.
 - `docs/ADMINISTRATION.md` documents configuration precedence, recovery and deployment requirements.
+
+## Bitterroot import
+
+Migration `server/migrations/003_asset_documents.sql` adds structured record documents and stable source identities. After building the API, import the canonical Bitterroot snapshot with:
+
+```bash
+npm run import:bitterroot
+```
+
+The import assigns every Bitterroot record to Eirvargr's immutable Discord account `1544473372073791602`. Eirvargr must have signed in to Orbis at least once so that account exists in PostgreSQL. The import is additive and safe to rerun: existing imported records and later edits are not overwritten.
+
+The imported collection contains 28 indexed records: the world, 2 species, 14 places, 1 faction, 6 societies, 1 family, 1 memory, and 2 linked characters.

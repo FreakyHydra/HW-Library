@@ -1,5 +1,6 @@
 import type { LibraryApi } from './contracts';
 import type { AssetListResponse, AssetQuery, LibraryOverview } from '../types/library';
+import type { LibraryAssetUpdate } from '../types/library';
 import { assetTypes } from '../types/library';
 import { fixtures } from '../features/library/fixtures';
 
@@ -30,6 +31,14 @@ export class FixtureLibraryApi implements LibraryApi {
     await pause();
     const asset = fixtures.find((item) => item.id === id);
     if (!asset) throw new Error(`Asset not found: ${id}`);
+    return asset;
+  }
+
+  async updateAsset(id: string, update: LibraryAssetUpdate) {
+    await pause();
+    const asset = fixtures.find((item) => item.id === id);
+    if (!asset) throw new Error(`Asset not found: ${id}`);
+    Object.assign(asset, update, { updatedAt: new Date().toISOString() });
     return asset;
   }
 }

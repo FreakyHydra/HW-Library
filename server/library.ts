@@ -9,6 +9,7 @@ import type { SettingsStore } from './settings.js';
 const assetTypes = ['world', 'character', 'place', 'faction', 'species', 'society', 'family', 'memory'] as const;
 const sourceTypes = ['curated', 'user-created', 'imported-v2', 'copied', 'public-curated', 'legacy-import'] as const;
 const tones = ['moon', 'forest', 'ember', 'mist', 'violet', 'river'] as const;
+const documentSchema = z.record(z.string(), z.unknown()).refine((value) => JSON.stringify(value).length <= 128_000, 'Record content is too large.');
 
 const createAssetSchema = z.object({
   type: z.enum(assetTypes),
@@ -18,8 +19,9 @@ const createAssetSchema = z.object({
   contentRating: z.enum(['sfw', 'adult']).default('sfw'),
   tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
   visualTone: z.enum(tones).default('moon'),
+  document: documentSchema.default({}),
 });
-const updateAssetSchema = createAssetSchema.omit({ type: true }).partial();
+const updateAssetSchema = createAssetSchema.omit({ type: true }).partial().extend({ document: documentSchema.optional() });
 
 function canViewAdult(request: Request) {
   return request.session.access?.canViewAdult === true;
@@ -59,6 +61,8 @@ function mapAsset(row: Record<string, unknown>) {
     dependencyCount: row.dependency_count,
     pinned: row.pinned,
     visualTone: row.visual_tone,
+    sourceAssetId: row.source_asset_id ?? undefined,
+    document: row.document ?? {},
     author: row.creator_user_id ? { id: row.creator_user_id, displayName: row.author_name, avatarUrl: row.author_avatar_url ?? undefined } : undefined,
   };
 }
@@ -137,9 +141,9 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
     try {
       const asset = createAssetSchema.parse(request.body);
       const result = await pool.query(
-        `INSERT INTO library_assets (id,type,name,summary,origin_world_id,creator_user_id,source_type,content_rating,tags,visual_tone)
-         VALUES ($1,$2,$3,$4,$5,$6,'user-created',$7,$8,$9) RETURNING *`,
-        [randomUUID(), asset.type, asset.name, asset.summary, asset.originWorldId ?? null, request.session.userId, asset.contentRating, asset.tags, asset.visualTone],
+        `INSERT INTO library_assets (id,type,name,summary,origin_world_id,creator_user_id,source_type,content_rating,tags,visual_tone,document)
+         VALUES ($1,$2,$3,$4,$5,$6,'user-created',$7,$8,$9,$10::jsonb) RETURNING *`,
+        [randomUUID(), asset.type, asset.name, asset.summary, asset.originWorldId ?? null, request.session.userId, asset.contentRating, asset.tags, asset.visualTone, JSON.stringify(asset.document)],
       );
       response.status(201).json(mapAsset({ ...result.rows[0], restricted: false }));
     } catch (error) {
@@ -160,11 +164,14 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
         content_rating: asset.contentRating ?? current.rows[0].content_rating,
         tags: asset.tags ?? current.rows[0].tags,
         visual_tone: asset.visualTone ?? current.rows[0].visual_tone,
+        document: asset.document ?? current.rows[0].document ?? {},
       }};
+      if (Object.prototype.hasOwnProperty.call(nextAsset.document, 'name')) nextAsset.document.name = nextAsset.name;
+      if (Object.prototype.hasOwnProperty.call(nextAsset.document, 'title')) nextAsset.document.title = nextAsset.name;
       const result = await pool.query(
-        `UPDATE library_assets SET name=$2, summary=$3, origin_world_id=$4, content_rating=$5, tags=$6, visual_tone=$7, updated_at=now()
+        `UPDATE library_assets SET name=$2, summary=$3, origin_world_id=$4, content_rating=$5, tags=$6, visual_tone=$7, document=$8::jsonb, updated_at=now()
          WHERE id=$1 RETURNING *`,
-        [request.params.id, nextAsset.name, nextAsset.summary, nextAsset.origin_world_id, nextAsset.content_rating, nextAsset.tags, nextAsset.visual_tone],
+        [request.params.id, nextAsset.name, nextAsset.summary, nextAsset.origin_world_id, nextAsset.content_rating, nextAsset.tags, nextAsset.visual_tone, JSON.stringify(nextAsset.document)],
       );
       const user = await pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [request.session.userId]);
       response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: user.rows[0].display_name, author_avatar_url: user.rows[0].avatar_url }));
