@@ -16,6 +16,7 @@ declare module 'express-session' {
     oauthState?: string;
     oauthReturnTo?: string;
     userId?: string;
+    discordUserId?: string;
     discordAccessToken?: string;
     discordTokenExpiresAt?: number;
     access?: SessionAccess;
