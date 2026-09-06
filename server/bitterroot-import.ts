@@ -48,10 +48,16 @@ export function buildBitterrootSeedAssets(world: BitterrootSourceWorld): Bitterr
   const common = { createdAt: world.createdAt, updatedAt: world.updatedAt };
   const worldDocument = {
     sourceId: world.id,
-    ...structuredClone(world.identity),
+    identity: structuredClone(world.identity),
     rules: structuredClone(world.rules),
     lore: structuredClone(world.lore),
     timeWeather: structuredClone(world.timeWeather ?? {}),
+    species: structuredClone(world.species ?? []),
+    locations: structuredClone(world.locations ?? []),
+    factions: structuredClone(world.factions ?? []),
+    societies: structuredClone(world.societies ?? []),
+    families: structuredClone(world.families ?? []),
+    memories: structuredClone(world.memories ?? []),
   };
   const assets: BitterrootSeedAsset[] = [{
     sourceAssetId: sourceIdentity('world', world.id),

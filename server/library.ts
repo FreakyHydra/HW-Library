@@ -168,6 +168,8 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
       }};
       if (Object.prototype.hasOwnProperty.call(nextAsset.document, 'name')) nextAsset.document.name = nextAsset.name;
       if (Object.prototype.hasOwnProperty.call(nextAsset.document, 'title')) nextAsset.document.title = nextAsset.name;
+      const identity = nextAsset.document.identity;
+      if (identity && typeof identity === 'object' && 'name' in (identity as Record<string, unknown>)) (identity as Record<string, unknown>).name = nextAsset.name;
       const result = await pool.query(
         `UPDATE library_assets SET name=$2, summary=$3, origin_world_id=$4, content_rating=$5, tags=$6, visual_tone=$7, document=$8::jsonb, updated_at=now()
          WHERE id=$1 RETURNING *`,
