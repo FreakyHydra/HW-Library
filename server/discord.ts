@@ -22,6 +22,16 @@ interface DiscordToken {
   token_type: 'Bearer';
 }
 
+export class DiscordMembershipRequestError extends Error {
+  constructor(
+    public readonly status: number | undefined,
+    public readonly retryable: boolean,
+  ) {
+    super(status ? `Discord membership request failed (${status}).` : 'Discord membership request failed (network error).');
+    this.name = 'DiscordMembershipRequestError';
+  }
+}
+
 export function discordAuthorizeUrl(config: AppConfig, state: string) {
   const query = new URLSearchParams({
     client_id: config.DISCORD_CLIENT_ID,
@@ -61,11 +71,19 @@ async function discordGet<T>(path: string, accessToken: string): Promise<T> {
 export const getDiscordUser = (accessToken: string) => discordGet<DiscordUser>('/users/@me', accessToken);
 
 export async function getGuildMembership(accessToken: string, guildId: string) {
-  const response = await fetch(`${DISCORD_API}/users/@me/guilds/${guildId}/member`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${DISCORD_API}/users/@me/guilds/${guildId}/member`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  } catch {
+    throw new DiscordMembershipRequestError(undefined, true);
+  }
   if (response.status === 404) return { isGuildMember: false, roles: [] as string[] };
-  if (!response.ok) throw new Error(`Discord membership request failed (${response.status}).`);
+  if (!response.ok) {
+    const retryable = response.status === 408 || response.status === 425 || response.status === 429 || response.status >= 500;
+    throw new DiscordMembershipRequestError(response.status, retryable);
+  }
   const member = await response.json() as { roles?: string[] };
   return { isGuildMember: true, roles: member.roles ?? [] };
 }

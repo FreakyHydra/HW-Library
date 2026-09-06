@@ -6,6 +6,9 @@ export interface SessionAccess {
   canCreate: boolean;
   canAdmin: boolean;
   checkedAt: number;
+  verifiedAt?: number;
+  membershipMissingAt?: number;
+  retryAfter?: number;
 }
 
 declare module 'express-session' {

@@ -4,12 +4,16 @@ import { z } from 'zod';
 import { decideAccess } from './access.js';
 import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
-import { discordAuthorizeUrl, discordAvatarUrl, discordDecorationUrl, exchangeCode, getDiscordUser, getGuildMembership } from './discord.js';
+import { DiscordMembershipRequestError, discordAuthorizeUrl, discordAvatarUrl, discordDecorationUrl, exchangeCode, getDiscordUser, getGuildMembership } from './discord.js';
 import type { SettingsStore } from './settings.js';
 import './types.js';
 
 const profileSchema = z.object({ displayName: z.string().trim().min(2).max(40) });
 const ACCESS_MAX_AGE_MS = 5 * 60 * 1000;
+const ACCESS_RETRY_COOLDOWN_MS = 30 * 1000;
+const MEMBERSHIP_CONFIRMATION_COOLDOWN_MS = 10 * 1000;
+const ACCESS_STALE_GRACE_MS = 15 * 60 * 1000;
+const activeAccessRefreshes = new Map<string, Promise<Awaited<ReturnType<typeof evaluateDiscordAccess>>>>();
 
 const safeEqual = (left: string, right: string) => {
   const leftBuffer = Buffer.from(left);
@@ -30,7 +34,12 @@ function publicProfile(row: Record<string, unknown>, access: { isGuildMember: bo
     avatarDecorationUrl: row.avatar_decoration_url,
     accentColor: row.accent_color,
     displayNameCustomized: row.display_name_customized,
-    permissions: access,
+    permissions: {
+      isGuildMember: access.isGuildMember,
+      canViewAdult: access.canViewAdult,
+      canCreate: access.canCreate,
+      canAdmin: access.canAdmin,
+    },
   };
 }
 
@@ -54,15 +63,43 @@ async function evaluateDiscordAccess(accessToken: string, config: AppConfig, set
 
 export async function refreshSessionAccess(request: Request, config: AppConfig, settingsStore: SettingsStore, force = false) {
   if (!request.session.userId || !request.session.discordAccessToken) return;
-  if (!force && request.session.access && Date.now() - request.session.access.checkedAt < ACCESS_MAX_AGE_MS) return;
-  if ((request.session.discordTokenExpiresAt ?? 0) <= Date.now()) {
-    request.session.access = { ...noAccess, checkedAt: Date.now() };
+  const now = Date.now();
+  if (request.session.access && (request.session.access.retryAfter ?? 0) > now) return;
+  if (!force && request.session.access && now - request.session.access.checkedAt < ACCESS_MAX_AGE_MS) return;
+  if ((request.session.discordTokenExpiresAt ?? 0) <= now) {
+    request.session.access = { ...noAccess, checkedAt: now };
     return;
   }
+
+  const refreshKey = request.session.userId;
+  let refresh = activeAccessRefreshes.get(refreshKey);
+  if (!refresh) {
+    refresh = evaluateDiscordAccess(request.session.discordAccessToken, config, settingsStore);
+    activeAccessRefreshes.set(refreshKey, refresh);
+  }
   try {
-    request.session.access = { ...await evaluateDiscordAccess(request.session.discordAccessToken, config, settingsStore), checkedAt: Date.now() };
-  } catch {
-    request.session.access = { ...noAccess, checkedAt: Date.now() };
+    const refreshedAccess = await refresh;
+    if (!refreshedAccess.isGuildMember && request.session.access?.isGuildMember && !request.session.access.membershipMissingAt) {
+      request.session.access = { ...request.session.access, checkedAt: 0, membershipMissingAt: now, retryAfter: now + MEMBERSHIP_CONFIRMATION_COOLDOWN_MS };
+      console.warn('Discord membership was reported missing once; retaining verified access until confirmation.');
+      return;
+    }
+    request.session.access = { ...refreshedAccess, checkedAt: now, verifiedAt: now };
+  } catch (error) {
+    if (!(error instanceof DiscordMembershipRequestError)) throw error;
+
+    const lastVerifiedAt = request.session.access?.verifiedAt ?? request.session.access?.checkedAt ?? 0;
+    const canUseLastVerifiedAccess = error.retryable && request.session.access && now - lastVerifiedAt <= ACCESS_STALE_GRACE_MS;
+    if (canUseLastVerifiedAccess) {
+      request.session.access = { ...request.session.access!, checkedAt: 0, verifiedAt: lastVerifiedAt, retryAfter: now + ACCESS_RETRY_COOLDOWN_MS };
+      console.warn(`Discord membership refresh temporarily unavailable (${error.status ?? 'network'}); retaining recently verified access.`);
+      return;
+    }
+
+    request.session.access = { ...noAccess, checkedAt: now };
+    console.warn(`Discord membership refresh denied (${error.status ?? 'network'}); reauthorization may be required.`);
+  } finally {
+    if (activeAccessRefreshes.get(refreshKey) === refresh) activeAccessRefreshes.delete(refreshKey);
   }
 }
 
@@ -144,7 +181,8 @@ export function createAuthRouter(config: AppConfig, pool: DatabasePool, settings
       request.session.userId = String(result.rows[0].id);
       request.session.discordAccessToken = token.access_token;
       request.session.discordTokenExpiresAt = Date.now() + token.expires_in * 1000;
-      request.session.access = { ...access, checkedAt: Date.now() };
+      const checkedAt = Date.now();
+      request.session.access = { ...access, checkedAt, verifiedAt: checkedAt };
       request.session.save((error) => error ? next(error) : response.redirect(returnTo));
     } catch (error) {
       next(error);
