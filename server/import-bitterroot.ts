@@ -17,21 +17,20 @@ async function insertAsset(asset: BitterrootSeedAsset, ownerUserId: string, orig
        id, type, name, summary, origin_world_id, creator_user_id, source_type, source_asset_id,
        content_rating, tags, dependency_count, pinned, visual_tone, document, created_at, updated_at
      ) VALUES ($1,$2,$3,$4,$5,$6,'public-curated',$7,'sfw',$8,$9,$10,$11,$12::jsonb,$13,$14)
-     ON CONFLICT (source_type, source_asset_id) WHERE source_asset_id IS NOT NULL DO NOTHING
-     RETURNING id`,
+     ON CONFLICT (source_type, source_asset_id) WHERE source_asset_id IS NOT NULL
+     DO UPDATE SET creator_user_id = EXCLUDED.creator_user_id
+     RETURNING id, (xmax = 0) AS inserted`,
     [randomUUID(), asset.type, asset.name, asset.summary, originWorldId, ownerUserId, asset.sourceAssetId,
       asset.tags, asset.dependencyCount, asset.type === 'world', asset.visualTone, JSON.stringify(asset.document), asset.createdAt, asset.updatedAt],
   );
-  if (result.rowCount) return { id: String(result.rows[0].id), inserted: true };
-  const existing = await client.query('SELECT id FROM library_assets WHERE source_type = $1 AND source_asset_id = $2', ['public-curated', asset.sourceAssetId]);
-  if (!existing.rowCount) throw new Error(`Could not resolve existing asset ${asset.sourceAssetId}.`);
-  return { id: String(existing.rows[0].id), inserted: false };
+  if (!result.rowCount) throw new Error(`Could not resolve asset ${asset.sourceAssetId}.`);
+  return { id: String(result.rows[0].id), inserted: Boolean(result.rows[0].inserted) };
 }
 
 try {
   await client.query('BEGIN');
   const owner = await client.query('SELECT id FROM users WHERE discord_id = $1', [BITTERROOT_OWNER_DISCORD_ID]);
-  if (!owner.rowCount) throw new Error('Eirvargr must sign in to Orbis once before Bitterroot can be imported.');
+  if (!owner.rowCount) throw new Error('Eirvargr must sign in to Coda once before Bitterroot can be imported.');
   const ownerUserId = String(owner.rows[0].id);
   const world = assets.find((asset) => asset.type === 'world');
   if (!world) throw new Error('The Bitterroot source does not contain its world record.');
