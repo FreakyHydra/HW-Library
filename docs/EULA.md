@@ -71,7 +71,83 @@ Private prompts, private AI responses, private memory, private branches, private
 
 A shared user scene requires deliberate participation. Merely occupying the same location does not place users into one another's private conversations.
 
-## 8. Restrictions
+## 8. AI providers and model behavior
+
+The software may support multiple AI providers, model vendors, third-party gateways, user-configured remote endpoints and personally operated local models.
+
+The Howling Whispers does not guarantee that all providers will behave alike or permit the same content.
+
+A selected provider may apply its own moderation, safety rules, acceptable-use rules, account restrictions, geographic restrictions, rate limits, context limits, pricing and data-handling practices.
+
+A roleplay request that is permitted by The Howling Whispers may still be refused, altered, filtered or restricted by the selected external provider.
+
+Conversely, a more permissive or locally operated model may produce unexpected material, including explicit sexual content, graphic violence, offensive language, disturbing themes, inaccurate world facts or other output that the user did not specifically request.
+
+Users acknowledge that generative output is probabilistic and is not guaranteed to be accurate, safe, canonical, consistent or suitable for every user.
+
+Provider-specific practical guidance is maintained in [AI Providers and Model Policy](./AI_PROVIDERS_AND_MODEL_POLICY.md).
+
+## 9. NovelAI and fiction-focused models
+
+NovelAI or similar fiction-focused models may be offered because they can perform well for free-form prose and roleplay.
+
+Such models may also follow the tone and direction of a scene more freely than heavily moderated general-purpose services and may therefore produce explicit, violent, disturbing or otherwise unexpected content.
+
+Availability of such a model is not a guarantee that every output will match the user's preferences or the authored canon.
+
+Use remains subject to the selected provider's own current terms and rules.
+
+## 10. Hosted general-purpose providers
+
+Providers such as OpenAI, Anthropic, Google, Mistral-hosted services or similar third-party AI services may apply their own safety or acceptable-use boundaries.
+
+Users acknowledge that:
+
+- some fictional scenes may be refused or constrained;
+- providers may change model behavior or policy without control by The Howling Whispers;
+- model names and versions may change;
+- provider outages or account restrictions may interrupt availability; and
+- provider-specific terms remain binding where applicable.
+
+The Howling Whispers is not required to bypass or defeat an external provider's restrictions.
+
+## 11. Personally operated local models
+
+Where supported, users may connect compatible models running on their own device, local network or personally controlled server.
+
+The user is responsible for the model and endpoint they operate, including:
+
+- obtaining and using the model under a valid license;
+- complying with applicable law;
+- securing the endpoint from unauthorized access;
+- understanding the inference software's logging and retention behavior;
+- protecting credentials or access tokens;
+- providing sufficient hardware and network resources; and
+- accepting that local models may have little or no provider-side moderation.
+
+The Howling Whispers does not become the licensor, operator or publisher of a user's local model merely because the software provides a compatible connection method.
+
+The user must not assume that operating a model locally removes obligations imposed by law, the model license, multiplayer rules or the rights of other users.
+
+## 12. User-supplied remote endpoints and gateways
+
+A user may be allowed to connect an external API or third-party gateway that is not operated by The Howling Whispers.
+
+The user is responsible for reviewing that service's terms, privacy practices, data retention, charges and acceptable-use restrictions.
+
+The Howling Whispers cannot guarantee that a user-supplied endpoint accurately identifies the model it serves, securely handles submitted data, remains online, or complies with any particular privacy standard.
+
+Where the user supplies their own provider credentials, the user is responsible for charges and activity associated with that provider account.
+
+## 13. Provider changes and removal
+
+The Howling Whispers may add, remove, disable or replace model integrations because of provider policy changes, technical changes, pricing, security, privacy, legal concerns, reliability or service discontinuation.
+
+No perpetual license or right to access a particular third-party model is granted through this EULA.
+
+Where technically practical, authored characters, worlds, personas and saved sessions should remain usable with other compatible providers even when a specific provider integration is removed.
+
+## 14. Restrictions
 
 You may not intentionally:
 
@@ -79,12 +155,14 @@ You may not intentionally:
 - impersonate another user or falsify account identity;
 - interfere with the service, servers, authentication systems or other users' sessions;
 - obtain another user's private conversation or account data without authorization;
+- use provider credentials that you are not authorized to use;
+- intentionally expose another user's private content to a model or endpoint without authorization;
 - use the software in a way that violates applicable law; or
 - remove or misrepresent ownership notices attached to proprietary service components.
 
 Additional community rules may apply to Discord-linked or multiplayer areas.
 
-## 9. Suspension and termination
+## 15. Suspension and termination
 
 Access may be suspended or terminated where reasonably necessary to protect the service, users, community, infrastructure or legal compliance.
 
@@ -92,15 +170,15 @@ Fabula multiplayer access may be suspended if the user no longer satisfies its e
 
 Where possible, loss of multiplayer access does not automatically terminate ordinary private roleplay access that remains otherwise available to the user.
 
-## 10. Updates and changes
+## 16. Updates and changes
 
 The software and services are under active development and may be updated, replaced, reconfigured or discontinued.
 
-Features may change between versions, including how guest persistence, registered storage, multiplayer presence, pricing and access controls operate.
+Features may change between versions, including how guest persistence, registered storage, multiplayer presence, pricing, providers, models and access controls operate.
 
 Continued use after an applicable agreement update may constitute acceptance where legally permitted and where required notice has been provided.
 
-## 11. No guarantee of uninterrupted service
+## 17. No guarantee of uninterrupted service
 
 The software and services are provided subject to availability.
 
@@ -108,10 +186,12 @@ Guest users must not treat Speculus guest sessions as permanent storage.
 
 Registered users should use available export or backup tools for important authored material where practical.
 
-## 12. Mandatory rights
+Third-party AI providers and user-supplied endpoints may become unavailable independently of The Howling Whispers.
+
+## 18. Mandatory rights
 
 Nothing in this agreement is intended to remove consumer, privacy or other statutory rights that applicable law does not allow to be excluded or waived.
 
-## 13. Agreement
+## 19. Agreement
 
-By installing, accessing or using software or services covered by this agreement, you agree to this EULA together with the applicable Terms of Service and feature-specific rules.
+By installing, accessing or using software or services covered by this agreement, you agree to this EULA together with the applicable Terms of Service, AI provider/model rules and feature-specific rules.
