@@ -67,6 +67,9 @@ function editorApp(userId: string) {
   };
   const pool = {
     query: async (sql: string, values?: unknown[]) => {
+      if (sql.startsWith('SELECT discord_id FROM users')) return {
+        rows: [{ discord_id: userId === ownerUserId ? BITTERROOT_OWNER_DISCORD_ID : '999999999999999999' }], rowCount: 1,
+      };
       if (sql.startsWith('UPDATE users SET is_guild_member')) return { rows: [], rowCount: 1 };
       if (sql.startsWith('SELECT * FROM library_assets')) return { rows: [current], rowCount: 1 };
       if (sql.startsWith('UPDATE library_assets SET')) return { rows: [{ ...current, name: values?.[1], document: JSON.parse(String(values?.[7])) }], rowCount: 1 };
