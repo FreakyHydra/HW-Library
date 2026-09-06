@@ -1,16 +1,17 @@
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
-import { refreshSessionAccess } from './auth.js';
+import { ensureSuperAdminAccess, refreshSessionAccess } from './auth.js';
 import { adminSettingsSchema, SettingsLockoutError, type SettingsStore } from './settings.js';
 import './types.js';
 
-export function requireAdmin(config: AppConfig, settingsStore: SettingsStore) {
+export function requireAdmin(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   return async (request: Request, response: Response, next: NextFunction) => {
     try {
-      if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to administer Orbis.' });
-      await refreshSessionAccess(request, config, settingsStore, true);
-      if (!request.session.access?.canAdmin) return response.status(403).json({ error: 'Orbis administrator access is required.' });
+      if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to administer Coda.' });
+      const isSuperAdmin = await ensureSuperAdminAccess(request, pool);
+      if (!isSuperAdmin) await refreshSessionAccess(request, config, settingsStore, true);
+      if (!request.session.access?.canAdmin) return response.status(403).json({ error: 'Coda administrator access is required.' });
       next();
     } catch (error) {
       next(error);
