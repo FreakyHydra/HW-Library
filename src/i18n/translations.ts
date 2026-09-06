@@ -36,7 +36,6 @@ const de: Record<string, string> = {
   'FOUNDATION': 'GRUNDLAGE',
   'CORE': 'KERN',
   'TESTING': 'TESTPHASE',
-  'CONCEPT LIVE': 'KONZEPT VERFÜGBAR',
   'WHAT IS THIS?': 'WAS IST DAS?',
   'Purpose': 'Zweck',
   'CURRENT STATUS': 'AKTUELLER STATUS',
