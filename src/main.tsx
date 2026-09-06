@@ -10,6 +10,7 @@ import { App } from './app/App';
 import { AuthProvider } from './auth/AuthContext';
 import './styles/global.css';
 import './styles/project-etas.css';
+import './styles/project-pages.css';
 import './styles/world-forge.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
