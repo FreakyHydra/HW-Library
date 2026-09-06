@@ -18,7 +18,18 @@ async function insertAsset(asset: BitterrootSeedAsset, ownerUserId: string, orig
        content_rating, tags, dependency_count, pinned, visual_tone, document, created_at, updated_at
      ) VALUES ($1,$2,$3,$4,$5,$6,'public-curated',$7,'sfw',$8,$9,$10,$11,$12::jsonb,$13,$14)
      ON CONFLICT (source_type, source_asset_id) WHERE source_asset_id IS NOT NULL
-     DO UPDATE SET creator_user_id = EXCLUDED.creator_user_id
+     DO UPDATE SET
+       origin_world_id = EXCLUDED.origin_world_id,
+       creator_user_id = EXCLUDED.creator_user_id,
+       name = EXCLUDED.name,
+       summary = EXCLUDED.summary,
+       content_rating = EXCLUDED.content_rating,
+       tags = EXCLUDED.tags,
+       dependency_count = EXCLUDED.dependency_count,
+       pinned = EXCLUDED.pinned,
+       visual_tone = EXCLUDED.visual_tone,
+       document = EXCLUDED.document,
+       updated_at = EXCLUDED.updated_at
      RETURNING id, (xmax = 0) AS inserted`,
     [randomUUID(), asset.type, asset.name, asset.summary, originWorldId, ownerUserId, asset.sourceAssetId,
       asset.tags, asset.dependencyCount, asset.type === 'world', asset.visualTone, JSON.stringify(asset.document), asset.createdAt, asset.updatedAt],
@@ -41,7 +52,7 @@ try {
     inserted += Number(result.inserted);
   }
   await client.query('COMMIT');
-  console.log(`Bitterroot import complete: ${inserted} inserted, ${assets.length - inserted} already present, ${assets.length} total.`);
+  console.log(`Bitterroot synchronization complete: ${inserted} inserted, ${assets.length - inserted} refreshed, ${assets.length} total.`);
 } catch (error) {
   await client.query('ROLLBACK');
   throw error;
