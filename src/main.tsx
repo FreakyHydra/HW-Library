@@ -10,6 +10,7 @@ import { App } from './app/App';
 import { AuthProvider } from './auth/AuthContext';
 import { I18nProvider } from './i18n/I18nContext';
 import './styles/global.css';
+import './styles/i18n.css';
 import './styles/project-etas.css';
 import './styles/project-pages.css';
 import './styles/sidebar-scroll.css';
