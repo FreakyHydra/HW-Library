@@ -4,10 +4,12 @@ import { discordLoginPath, useAuth } from '../auth/AuthContext';
 import { UserAvatar } from '../components/UserAvatar';
 import { useI18n } from '../i18n/I18nContext';
 import type { Locale } from '../i18n/translations';
+import { useTheme, type ThemePreference } from '../theme/ThemeContext';
 
 export function AccountView() {
   const { user, loading, updateDisplayName, logout } = useAuth();
   const { locale, setLocale, t } = useI18n();
+  const { preference: theme, setPreference: setTheme } = useTheme();
   const [displayName, setDisplayName] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
@@ -25,6 +27,12 @@ export function AccountView() {
     finally { setSaving(false); }
   };
 
+  const themeOptions: Array<{ value: ThemePreference; label: string; description: string }> = [
+    { value: 'auto', label: t('Auto'), description: t('Follow your device light or dark setting.') },
+    { value: 'dark', label: t('Dark'), description: t('Use Coda’s warm dark library theme.') },
+    { value: 'light', label: t('Light'), description: t('Use Coda’s warm ivory library theme.') },
+  ];
+
   return (
     <div className="page account-page">
       <section className="account-panel">
@@ -40,6 +48,26 @@ export function AccountView() {
             </select>
           </div>
           <small>{t('The choice is saved on this device. User-authored worlds, characters and roleplay text are not translated automatically.')}</small>
+        </div>
+
+        <div className="profile-form theme-setting">
+          <label>{t('Appearance')}</label>
+          <div className="theme-setting__options" role="radiogroup" aria-label={t('Appearance')}>
+            {themeOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={theme === option.value}
+                className={`theme-option ${theme === option.value ? 'is-active' : ''}`}
+                onClick={() => setTheme(option.value)}
+              >
+                <strong>{option.label}</strong>
+                <small>{option.description}</small>
+              </button>
+            ))}
+          </div>
+          <small>{t('The choice is saved on this device. Auto follows your operating system setting.')}</small>
         </div>
 
         <div className="permission-card">
