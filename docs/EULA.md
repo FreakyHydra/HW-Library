@@ -47,19 +47,17 @@ A license to use shared content in roleplay does not automatically grant ownersh
 
 Fabula multiplayer is a separate community-gated feature.
 
-Multiplayer access requires a registered account and active membership in The Howling Whispers Discord server.
-
-The Howling Whispers may additionally require a small paid multiplayer entitlement or subscription.
+Multiplayer access may require a registered account, active membership in The Howling Whispers Discord server and any paid multiplayer entitlement then required by the service.
 
 A user who is not eligible for Fabula multiplayer may still use eligible public or shared content in private roleplay where permitted.
 
-## 6. Multiplayer fees
+## 6. Payments
 
-Where Fabula multiplayer requires payment, the applicable price, billing interval and renewal terms will be displayed before purchase.
+Where a paid feature exists, the applicable price, billing interval, renewal terms and eligibility conditions will be displayed before purchase.
 
-Payment grants access to the applicable multiplayer service for the purchased period or entitlement. It does not grant ownership of the software, server infrastructure, shared worlds or other users' content.
+Payment grants access to the applicable service for the purchased period or entitlement. It does not grant ownership of the software, server infrastructure, shared worlds or other users' content.
 
-Loss of Discord server membership may make the user ineligible for Fabula multiplayer even if a paid entitlement would otherwise still be active, subject to any mandatory refund or consumer rights that apply.
+Refunds, cancellation and statutory withdrawal rights are governed by `PAYMENTS_REFUNDS_AND_CANCELLATION.md` and applicable law.
 
 ## 7. Multiplayer privacy boundary
 
@@ -85,7 +83,7 @@ Conversely, a more permissive or locally operated model may produce unexpected m
 
 Users acknowledge that generative output is probabilistic and is not guaranteed to be accurate, safe, canonical, consistent or suitable for every user.
 
-Provider-specific practical guidance is maintained in [AI Providers and Model Policy](./AI_PROVIDERS_AND_MODEL_POLICY.md).
+See `AI_PROVIDERS_AND_MODEL_POLICY.md`.
 
 ## 9. NovelAI and fiction-focused models
 
@@ -127,25 +125,25 @@ The user is responsible for the model and endpoint they operate, including:
 
 The Howling Whispers does not become the licensor, operator or publisher of a user's local model merely because the software provides a compatible connection method.
 
-The user must not assume that operating a model locally removes obligations imposed by law, the model license, multiplayer rules or the rights of other users.
-
 ## 12. User-supplied remote endpoints and gateways
 
 A user may be allowed to connect an external API or third-party gateway that is not operated by The Howling Whispers.
 
 The user is responsible for reviewing that service's terms, privacy practices, data retention, charges and acceptable-use restrictions.
 
-The Howling Whispers cannot guarantee that a user-supplied endpoint accurately identifies the model it serves, securely handles submitted data, remains online, or complies with any particular privacy standard.
+The Howling Whispers cannot guarantee that a user-supplied endpoint accurately identifies the model it serves, securely handles submitted data, remains online or complies with any particular privacy standard.
 
 Where the user supplies their own provider credentials, the user is responsible for charges and activity associated with that provider account.
 
-## 13. Provider changes and removal
+## 13. Fictional minor characters and user conduct
 
-The Howling Whispers may add, remove, disable or replace model integrations because of provider policy changes, technical changes, pricing, security, privacy, legal concerns, reliability or service discontinuation.
+The software may contain fictional characters who are minors for legitimate narrative purposes such as family relationships, development, genealogy, history and world simulation.
 
-No perpetual license or right to access a particular third-party model is granted through this EULA.
+The presence of such a character does not grant permission to use the software to create, request, store or distribute material that is unlawful under applicable law.
 
-Where technically practical, authored characters, worlds, personas and saved sessions should remain usable with other compatible providers even when a specific provider integration is removed.
+Users remain responsible for their own intentional prompts, uploads, publications and roleplay choices.
+
+Unexpected AI output is not automatically treated as proof of intent, but users must not intentionally preserve, distribute or exploit unlawful material once aware of it.
 
 ## 14. Restrictions
 
@@ -157,20 +155,69 @@ You may not intentionally:
 - obtain another user's private conversation or account data without authorization;
 - use provider credentials that you are not authorized to use;
 - intentionally expose another user's private content to a model or endpoint without authorization;
-- use the software in a way that violates applicable law; or
+- distribute malware or attack service infrastructure;
+- use the software for unlawful exploitation, fraud, harassment or infringement; or
 - remove or misrepresent ownership notices attached to proprietary service components.
 
-Additional community rules may apply to Discord-linked or multiplayer areas.
+The detailed conduct rules are in `ACCEPTABLE_USE_POLICY.md`.
 
-## 15. Suspension and termination
+## 15. User content and rights
+
+Users are responsible for having the rights needed for material they upload or publish.
+
+The software does not grant permission to infringe third-party copyrights, trademarks, privacy rights or other legal rights.
+
+See `CONTENT_AND_IP_POLICY.md`.
+
+## 16. Suspension, moderation and legal compliance
 
 Access may be suspended or terminated where reasonably necessary to protect the service, users, community, infrastructure or legal compliance.
 
-Fabula multiplayer access may be suspended if the user no longer satisfies its eligibility requirements, including required Discord server membership or an applicable paid entitlement.
+The Howling Whispers may preserve relevant records, restrict content and respond to valid legal process as described in `ILLEGAL_CONTENT_AND_LEGAL_REQUESTS.md`.
+
+Fabula multiplayer access may be suspended if the user no longer satisfies its eligibility requirements.
 
 Where possible, loss of multiplayer access does not automatically terminate ordinary private roleplay access that remains otherwise available to the user.
 
-## 16. Updates and changes
+## 17. Privacy and storage
+
+Personal data is handled according to `PRIVACY_POLICY.md`.
+
+Browser storage is described in `COOKIE_AND_LOCAL_STORAGE_POLICY.md`.
+
+Retention and deletion practices are described in `DATA_RETENTION_AND_DELETION.md`.
+
+Guest users must not treat Speculus guest sessions as permanent storage.
+
+## 18. Provider changes and removal
+
+The Howling Whispers may add, remove, disable or replace model integrations because of provider policy changes, technical changes, pricing, security, privacy, legal concerns, reliability or service discontinuation.
+
+No perpetual license or right to access a particular third-party model is granted through this EULA.
+
+## 19. No guarantee of uninterrupted service
+
+The software and services are provided subject to availability.
+
+Registered users should use available export or backup tools for important authored material where practical.
+
+Third-party AI providers and user-supplied endpoints may become unavailable independently of The Howling Whispers.
+
+## 20. Liability boundaries
+
+To the extent permitted by applicable law, The Howling Whispers is not responsible for losses caused solely by a user's unlawful conduct, unauthorized uploads, third-party provider failures, user-selected endpoints or other matters outside reasonable control.
+
+Nothing in this EULA excludes or limits liability that cannot legally be excluded or limited.
+
+## 21. Applicable law and jurisdiction
+
+The software and service may be affected by the law applicable to the operator, German law where relevant, European Union law and law applicable to the user's own location or conduct.
+
+The physical location of a server is not the sole test for every legal issue.
+
+Users remain responsible for laws that apply specifically to their conduct.
+
+## 22. Updates and changes
 
 The software and services are under active development and may be updated, replaced, reconfigured or discontinued.
 
@@ -178,20 +225,16 @@ Features may change between versions, including how guest persistence, registere
 
 Continued use after an applicable agreement update may constitute acceptance where legally permitted and where required notice has been provided.
 
-## 17. No guarantee of uninterrupted service
-
-The software and services are provided subject to availability.
-
-Guest users must not treat Speculus guest sessions as permanent storage.
-
-Registered users should use available export or backup tools for important authored material where practical.
-
-Third-party AI providers and user-supplied endpoints may become unavailable independently of The Howling Whispers.
-
-## 18. Mandatory rights
+## 23. Mandatory rights
 
 Nothing in this agreement is intended to remove consumer, privacy or other statutory rights that applicable law does not allow to be excluded or waived.
 
-## 19. Agreement
+## 24. Severability
 
-By installing, accessing or using software or services covered by this agreement, you agree to this EULA together with the applicable Terms of Service, AI provider/model rules and feature-specific rules.
+If one provision of this EULA is invalid or unenforceable, the remaining provisions continue to apply to the extent legally possible.
+
+## 25. Agreement
+
+By installing, accessing or using software or services covered by this agreement, you agree to this EULA together with the applicable Terms of Service and incorporated policies.
+
+This is a legal draft and should receive professional review before commercial public launch.
