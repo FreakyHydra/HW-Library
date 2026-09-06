@@ -9,6 +9,7 @@ import '@fontsource/nunito-sans/700.css';
 import { App } from './app/App';
 import { AuthProvider } from './auth/AuthContext';
 import './styles/global.css';
+import './styles/world-forge.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
