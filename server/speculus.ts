@@ -30,19 +30,23 @@ const simulationType = (type: string) => type === 'species' || type === 'society
 
 async function catalogueIdentity(pool: DatabasePool, row: Record<string, unknown>) {
   const result = await pool.query(
-    `SELECT code, prefix, generation, series, number, classification
-     FROM ensure_speculus_catalog_entry($1::uuid, $2::text, $3::jsonb)`,
-    [String(row.id), String(row.type), JSON.stringify(row.document ?? {})],
+    `SELECT code, prefix, plate, generation, registry_number, class_registry_number,
+            classification, asset_created_at, status
+     FROM ensure_speculus_catalog_entry_v2($1::uuid, $2::text, $3::jsonb, $4::timestamptz)`,
+    [String(row.id), String(row.type), JSON.stringify(row.document ?? {}), row.created_at],
   );
   if (!result.rowCount) throw new Error('Orbis could not assign a Speculus catalogue designation.');
   const catalog = result.rows[0];
   return {
     code: String(catalog.code),
     prefix: String(catalog.prefix),
+    plate: String(catalog.plate),
     generation: Number(catalog.generation),
-    series: String(catalog.series),
-    number: Number(catalog.number),
+    registryNumber: Number(catalog.registry_number),
+    classRegistryNumber: Number(catalog.class_registry_number),
     classification: String(catalog.classification),
+    createdAt: new Date(String(catalog.asset_created_at)).toISOString(),
+    status: String(catalog.status),
   };
 }
 
