@@ -28,35 +28,21 @@ const asRecord = (value: unknown): Record<string, unknown> => value && typeof va
 const stringValue = (value: unknown) => typeof value === 'string' ? value : '';
 const simulationType = (type: string) => type === 'species' || type === 'society' || type === 'family' || type === 'memory' ? 'other' : type;
 
-function catalogueClass(row: Record<string, unknown>) {
-  const type = String(row.type).toLowerCase();
-  const kind = stringValue(asRecord(row.document).kind).toLowerCase();
-  if (type === 'character') return { prefix: 'C', classification: 'CHARACTER' };
-  if (type === 'world') return { prefix: 'W', classification: 'WORLD' };
-  if (type === 'item') return { prefix: 'I', classification: 'ITEM' };
-  if (type === 'faction') return { prefix: 'F', classification: 'FACTION' };
-  if (type === 'species') return { prefix: 'S', classification: 'SPECIES' };
-  if (type === 'society') return { prefix: 'G', classification: 'SOCIETY' };
-  if (type === 'family') return { prefix: 'H', classification: 'FAMILY / HOUSEHOLD' };
-  if (type === 'memory') return { prefix: 'M', classification: 'MEMORY / EVENT' };
-  if (type === 'place') {
-    if (/town|settlement|village|city|hamlet|enclave/.test(kind)) return { prefix: 'T', classification: 'TOWN / SETTLEMENT' };
-    if (/building|structure|station|house|hall|temple|fort|castle/.test(kind)) return { prefix: 'B', classification: 'BUILDING / STRUCTURE' };
-    return { prefix: 'P', classification: 'PLACE' };
-  }
-  return { prefix: 'X', classification: 'OTHER' };
-}
-
-function catalogueIdentity(row: Record<string, unknown>) {
-  const { prefix, classification } = catalogueClass(row);
-  const compactId = String(row.id).replace(/[^0-9a-f]/gi, '');
-  const seed = Number.parseInt(compactId.slice(0, 8), 16);
-  const number = Number.isFinite(seed) ? seed % 1000 : 0;
+async function catalogueIdentity(pool: DatabasePool, row: Record<string, unknown>) {
+  const result = await pool.query(
+    `SELECT code, prefix, generation, series, number, classification
+     FROM ensure_speculus_catalog_entry($1::uuid, $2::text, $3::jsonb)`,
+    [String(row.id), String(row.type), JSON.stringify(row.document ?? {})],
+  );
+  if (!result.rowCount) throw new Error('Orbis could not assign a Speculus catalogue designation.');
+  const catalog = result.rows[0];
   return {
-    code: `SPC-${prefix}${String(number).padStart(3, '0')}`,
-    prefix,
-    number,
-    classification,
+    code: String(catalog.code),
+    prefix: String(catalog.prefix),
+    generation: Number(catalog.generation),
+    series: String(catalog.series),
+    number: Number(catalog.number),
+    classification: String(catalog.classification),
   };
 }
 
@@ -157,12 +143,13 @@ export function createSpeculusLaunchRouter(config: AppConfig, pool: DatabasePool
       const primaryAsset = simulationAsset(asset);
       const relatedAssets = relatedResult.rows.map((row) => simulationAsset(row, false));
       const card = characterCard(asset);
+      const catalog = await catalogueIdentity(pool, asset);
       const packageBody = {
         version: 1,
         launchId,
         issuedAt: now,
         expiresAt,
-        catalog: catalogueIdentity(asset),
+        catalog,
         primaryAsset,
         relatedAssets,
         character: card,
