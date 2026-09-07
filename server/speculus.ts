@@ -28,6 +28,38 @@ const asRecord = (value: unknown): Record<string, unknown> => value && typeof va
 const stringValue = (value: unknown) => typeof value === 'string' ? value : '';
 const simulationType = (type: string) => type === 'species' || type === 'society' || type === 'family' || type === 'memory' ? 'other' : type;
 
+function catalogueClass(row: Record<string, unknown>) {
+  const type = String(row.type).toLowerCase();
+  const kind = stringValue(asRecord(row.document).kind).toLowerCase();
+  if (type === 'character') return { prefix: 'C', classification: 'CHARACTER' };
+  if (type === 'world') return { prefix: 'W', classification: 'WORLD' };
+  if (type === 'item') return { prefix: 'I', classification: 'ITEM' };
+  if (type === 'faction') return { prefix: 'F', classification: 'FACTION' };
+  if (type === 'species') return { prefix: 'S', classification: 'SPECIES' };
+  if (type === 'society') return { prefix: 'G', classification: 'SOCIETY' };
+  if (type === 'family') return { prefix: 'H', classification: 'FAMILY / HOUSEHOLD' };
+  if (type === 'memory') return { prefix: 'M', classification: 'MEMORY / EVENT' };
+  if (type === 'place') {
+    if (/town|settlement|village|city|hamlet|enclave/.test(kind)) return { prefix: 'T', classification: 'TOWN / SETTLEMENT' };
+    if (/building|structure|station|house|hall|temple|fort|castle/.test(kind)) return { prefix: 'B', classification: 'BUILDING / STRUCTURE' };
+    return { prefix: 'P', classification: 'PLACE' };
+  }
+  return { prefix: 'X', classification: 'OTHER' };
+}
+
+function catalogueIdentity(row: Record<string, unknown>) {
+  const { prefix, classification } = catalogueClass(row);
+  const compactId = String(row.id).replace(/[^0-9a-f]/gi, '');
+  const seed = Number.parseInt(compactId.slice(0, 8), 16);
+  const number = Number.isFinite(seed) ? seed % 1000 : 0;
+  return {
+    code: `SPC-${prefix}${String(number).padStart(3, '0')}`,
+    prefix,
+    number,
+    classification,
+  };
+}
+
 function simulationAsset(row: Record<string, unknown>, includeData = true) {
   return {
     id: String(row.id),
@@ -130,6 +162,7 @@ export function createSpeculusLaunchRouter(config: AppConfig, pool: DatabasePool
         launchId,
         issuedAt: now,
         expiresAt,
+        catalog: catalogueIdentity(asset),
         primaryAsset,
         relatedAssets,
         character: card,
