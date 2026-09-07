@@ -63,6 +63,10 @@ function mapAsset(row: Record<string, unknown>, userId?: string, isSuperAdmin = 
     visualTone: row.visual_tone,
     sourceAssetId: row.source_asset_id ?? undefined,
     document: row.document ?? {},
+    speculus: row.speculus_code ? {
+      code: String(row.speculus_code),
+      classification: String(row.speculus_classification ?? ''),
+    } : undefined,
     canEdit: isSuperAdmin || Boolean(userId && row.creator_user_id === userId),
     author: row.creator_user_id ? { id: row.creator_user_id, displayName: row.author_name, avatarUrl: row.author_avatar_url ?? undefined } : undefined,
   };
@@ -71,10 +75,12 @@ function mapAsset(row: Record<string, unknown>, userId?: string, isSuperAdmin = 
 const selectAssets = `
   SELECT a.*, origin.name AS origin_world_name,
     u.display_name AS author_name, u.avatar_url AS author_avatar_url,
+    sc.code AS speculus_code, sc.classification AS speculus_classification,
     (a.content_rating = 'adult' AND NOT $1::boolean AND a.creator_user_id IS DISTINCT FROM $2::uuid) AS restricted
   FROM library_assets a
   LEFT JOIN library_assets origin ON origin.id = a.origin_world_id
-  LEFT JOIN users u ON u.id = a.creator_user_id`;
+  LEFT JOIN users u ON u.id = a.creator_user_id
+  LEFT JOIN speculus_catalog_registry sc ON sc.asset_id = a.id`;
 
 function requestIdentity(request: Request) {
   return {
@@ -129,7 +135,7 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
       if (sourceType) { values.push(sourceType); where.push(`a.source_type = $${values.length}`); }
       if (search) {
         values.push(`%${search}%`);
-        where.push(`(a.content_rating = 'adult' AND NOT $1::boolean OR a.name ILIKE $${values.length} OR a.summary ILIKE $${values.length} OR $${values.length} = ANY(a.tags))`);
+        where.push(`(a.content_rating = 'adult' AND NOT $1::boolean OR a.name ILIKE $${values.length} OR a.summary ILIKE $${values.length} OR sc.code ILIKE $${values.length} OR $${values.length} = ANY(a.tags))`);
       }
       const clause = where.length ? ` WHERE ${where.join(' AND ')}` : '';
       const order = request.query.sort === 'name' ? 'a.name ASC' : 'a.updated_at DESC';
@@ -161,7 +167,13 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
          VALUES ($1,$2,$3,$4,$5,$6,'user-created',$7,$8,$9,$10::jsonb) RETURNING *`,
         [randomUUID(), asset.type, asset.name, asset.summary, asset.originWorldId ?? null, request.session.userId, asset.contentRating, asset.tags, asset.visualTone, JSON.stringify(asset.document)],
       );
-      response.status(201).json(mapAsset({ ...result.rows[0], restricted: false }, request.session.userId));
+      const registry = await pool.query('SELECT code, classification FROM speculus_catalog_registry WHERE asset_id = $1', [result.rows[0].id]);
+      response.status(201).json(mapAsset({
+        ...result.rows[0],
+        restricted: false,
+        speculus_code: registry.rows[0]?.code,
+        speculus_classification: registry.rows[0]?.classification,
+      }, request.session.userId));
     } catch (error) {
       next(error);
     }
@@ -193,8 +205,18 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
          WHERE id=$1 RETURNING *`,
         [request.params.id, nextAsset.name, nextAsset.summary, nextAsset.origin_world_id, nextAsset.content_rating, nextAsset.tags, nextAsset.visual_tone, JSON.stringify(nextAsset.document)],
       );
-      const author = await pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [current.rows[0].creator_user_id]);
-      response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: author.rows[0]?.display_name, author_avatar_url: author.rows[0]?.avatar_url }, request.session.userId, isSuperAdmin));
+      const [author, registry] = await Promise.all([
+        pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [current.rows[0].creator_user_id]),
+        pool.query('SELECT code, classification FROM speculus_catalog_registry WHERE asset_id = $1', [request.params.id]),
+      ]);
+      response.json(mapAsset({
+        ...result.rows[0],
+        restricted: false,
+        author_name: author.rows[0]?.display_name,
+        author_avatar_url: author.rows[0]?.avatar_url,
+        speculus_code: registry.rows[0]?.code,
+        speculus_classification: registry.rows[0]?.classification,
+      }, request.session.userId, isSuperAdmin));
     } catch (error) {
       next(error);
     }
