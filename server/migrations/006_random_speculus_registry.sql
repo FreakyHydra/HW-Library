@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE IF NOT EXISTS speculus_catalog_reserved_plates (
   plate text PRIMARY KEY CHECK (plate ~ '^[A-Z]{2}[0-9]{5}$'),
   reason text NOT NULL DEFAULT '',
@@ -98,6 +100,13 @@ BEGIN
   RAISE EXCEPTION 'Speculus could not allocate an unused registry plate for generation %.', p_generation;
 END;
 $$;
+
+-- Free the old sequential public-code namespace before random conversion. This
+-- prevents a freshly generated plate from colliding with an unconverted 005
+-- placeholder code. The migration transaction makes this invisible externally.
+UPDATE speculus_catalog_registry
+SET code = 'MIGRATING-' || asset_id::text
+WHERE plate IS NULL;
 
 -- Convert any catalogue entries created by migration 005 to random public plates.
 -- Their hidden chronological class sequence (ordinal) stays intact.
@@ -354,3 +363,5 @@ BEGIN
   END LOOP;
 END;
 $$;
+
+COMMIT;
