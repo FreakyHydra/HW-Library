@@ -1,5 +1,5 @@
 import { ArrowLeft, Boxes, Clock3, MapPin, Pencil, Sparkles, UserRound } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { libraryApi } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
@@ -14,6 +14,15 @@ export function AssetDetailView() {
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState('');
   const { data: asset, error, loading, retry } = useLibraryData((signal) => libraryApi.getAsset(id, signal), [id]);
+
+  useEffect(() => {
+    const resetSimulationLaunch = () => {
+      setLaunching(false);
+      setLaunchError('');
+    };
+    window.addEventListener('pageshow', resetSimulationLaunch);
+    return () => window.removeEventListener('pageshow', resetSimulationLaunch);
+  }, []);
 
   if (loading) return <div className="page"><LoadingState label="Opening the record..." /></div>;
   if (error || !asset) return <div className="page"><ErrorState retry={retry} /></div>;
