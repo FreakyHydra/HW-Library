@@ -1,5 +1,6 @@
 import { ArrowLeft, Boxes, Clock3, MapPin, Pencil, Sparkles, UserRound } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { libraryApi } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { findNavigationItem } from '../app/library-nav';
@@ -8,7 +9,10 @@ import { useLibraryData } from '../hooks/useLibraryData';
 
 export function AssetDetailView() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState('');
   const { data: asset, error, loading, retry } = useLibraryData((signal) => libraryApi.getAsset(id, signal), [id]);
 
   if (loading) return <div className="page"><LoadingState label="Opening the record..." /></div>;
@@ -16,7 +20,18 @@ export function AssetDetailView() {
 
   const category = findNavigationItem(asset.type);
   const Icon = category?.icon;
-  const canEdit = user?.permissions.canCreate && asset.author?.id === user.id;
+  const canEdit = user && asset.canEdit === true;
+  const simulate = async () => {
+    if (!user) { navigate('/account'); return; }
+    setLaunching(true); setLaunchError('');
+    try {
+      const launch = await libraryApi.simulateAsset(asset.id);
+      window.location.assign(launch.launchUrl);
+    } catch (reason) {
+      setLaunchError(reason instanceof Error ? reason.message : 'Speculus could not start.');
+      setLaunching(false);
+    }
+  };
   return (
     <div className="page detail-page">
       <Link className="back-link" to={`/library/${asset.type}`}><ArrowLeft size={16} /> Back to {category?.label}</Link>
@@ -25,7 +40,8 @@ export function AssetDetailView() {
         <div className="detail-hero__copy">
           <span className="eyebrow">{Icon && <Icon size={14} />} {category?.shortLabel} record</span>
           <h1>{asset.name}</h1><p>{asset.summary}</p>
-          <div className="detail-actions">{canEdit ? <Link className="button button--primary" to={`/asset/${asset.id}/edit`}><Pencil size={16} /> Edit record</Link> : <button className="button button--disabled" disabled title="Only the verified creator can edit this record"><Pencil size={16} /> Creator protected</button>}<button className="button button--disabled" disabled title="Project Whispers arrives in a later phase"><Sparkles size={16} /> Simulate later</button></div>
+          <div className="detail-actions">{canEdit ? <Link className="button button--primary" to={`/asset/${asset.id}/edit`}><Pencil size={16} /> Edit record</Link> : <button className="button button--disabled" disabled title="Only the creator can edit this record"><Pencil size={16} /> Creator protected</button>}<button className="button button--secondary" disabled={launching} onClick={() => void simulate()}><Sparkles size={16} /> {launching ? 'Packaging...' : 'Simulate'}</button></div>
+          {launchError && <p className="form-message" role="alert">{launchError} {launchError.includes('Account settings') && <Link to="/account">Open Account</Link>}</p>}
         </div>
       </section>
       <div className="detail-layout">

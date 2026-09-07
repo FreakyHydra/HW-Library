@@ -57,10 +57,10 @@ const settingsStore = {
   getEffective: async () => ({ adultRoleIds: [], effectiveCreatorRoleIds: [], adminRoleIds: [], bootstrapAdminRoleIds: [], guildId: '' }),
 } as unknown as SettingsStore;
 
-function editorApp(userId: string) {
+function editorApp(userId: string, creatorUserId = ownerUserId, canCreate = true) {
   const current = {
     id: assetId, type: 'place', name: 'Brackenjaw', summary: 'Old summary', origin_world_id: null,
-    creator_user_id: ownerUserId, source_type: 'public-curated', source_asset_id: 'place:brackenjaw-enclave',
+    creator_user_id: creatorUserId, source_type: 'public-curated', source_asset_id: 'place:brackenjaw-enclave',
     content_rating: 'sfw', tags: ['Bitterroot'], dependency_count: 0, pinned: false, visual_tone: 'mist',
     document: { sourceId: 'brackenjaw-enclave', name: 'Brackenjaw', description: 'Old description' },
     created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
@@ -80,7 +80,7 @@ function editorApp(userId: string) {
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
-    Object.defineProperty(req, 'session', { value: { userId, access: { isGuildMember: true, canViewAdult: true, canCreate: true, canAdmin: false, checkedAt: Date.now() } }, configurable: true });
+    Object.defineProperty(req, 'session', { value: { userId, access: { isGuildMember: true, canViewAdult: true, canCreate, canAdmin: false, checkedAt: Date.now() } }, configurable: true });
     next();
   });
   app.use('/api/library', createLibraryRouter(config, pool, settingsStore));
@@ -104,5 +104,14 @@ describe('Bitterroot record editing', () => {
 
   it('rejects edits from a different verified creator', async () => {
     await request(editorApp(otherUserId)).patch(`/api/library/assets/${assetId}`).send({ name: 'Stolen record' }).expect(403);
+  });
+
+  it('keeps an owner able to edit after their creator role is unavailable', async () => {
+    const response = await request(editorApp(otherUserId, otherUserId, false))
+      .patch(`/api/library/assets/${assetId}`)
+      .send({ name: 'Still mine' })
+      .expect(200);
+    expect(response.body.name).toBe('Still mine');
+    expect(response.body.canEdit).toBe(true);
   });
 });

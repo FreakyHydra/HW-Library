@@ -45,4 +45,13 @@ export class HttpLibraryApi implements LibraryApi {
     if (!response.ok) throw new LibraryApiError(data.error ?? `Library request failed with status ${response.status}.`, response.status);
     return data;
   }
+
+  async simulateAsset(id: string) {
+    const response = await fetch(`${this.baseUrl}/v1/library/assets/${encodeURIComponent(id)}/simulate`, {
+      method: 'POST', credentials: 'include', headers: { Accept: 'application/json' },
+    });
+    const data = await response.json() as { launchUrl?: string; expiresAt?: number; error?: string; settingsPath?: string };
+    if (!response.ok || !data.launchUrl || !data.expiresAt) throw new LibraryApiError(data.error ?? `Simulation launch failed with status ${response.status}.`, response.status);
+    return { launchUrl: data.launchUrl, expiresAt: data.expiresAt };
+  }
 }

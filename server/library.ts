@@ -6,7 +6,7 @@ import type { AppConfig } from './config.js';
 import type { DatabasePool } from './db.js';
 import type { SettingsStore } from './settings.js';
 
-const assetTypes = ['world', 'character', 'place', 'faction', 'species', 'society', 'family', 'memory'] as const;
+const assetTypes = ['world', 'character', 'place', 'item', 'faction', 'species', 'society', 'family', 'memory'] as const;
 const sourceTypes = ['curated', 'user-created', 'imported-v2', 'copied', 'public-curated', 'legacy-import'] as const;
 const tones = ['moon', 'forest', 'ember', 'mist', 'violet', 'river'] as const;
 const documentSchema = z.record(z.string(), z.unknown()).refine((value) => JSON.stringify(value).length <= 128_000, 'Record content is too large.');
@@ -27,7 +27,7 @@ function canViewAdult(request: Request) {
   return request.session.access?.canViewAdult === true;
 }
 
-function mapAsset(row: Record<string, unknown>) {
+function mapAsset(row: Record<string, unknown>, userId?: string, isSuperAdmin = false) {
   if (row.restricted) {
     return {
       id: `restricted:${row.id}`,
@@ -63,6 +63,7 @@ function mapAsset(row: Record<string, unknown>) {
     visualTone: row.visual_tone,
     sourceAssetId: row.source_asset_id ?? undefined,
     document: row.document ?? {},
+    canEdit: isSuperAdmin || Boolean(userId && row.creator_user_id === userId),
     author: row.creator_user_id ? { id: row.creator_user_id, displayName: row.author_name, avatarUrl: row.author_avatar_url ?? undefined } : undefined,
   };
 }
@@ -70,10 +71,17 @@ function mapAsset(row: Record<string, unknown>) {
 const selectAssets = `
   SELECT a.*, origin.name AS origin_world_name,
     u.display_name AS author_name, u.avatar_url AS author_avatar_url,
-    (a.content_rating = 'adult' AND NOT $1::boolean) AS restricted
+    (a.content_rating = 'adult' AND NOT $1::boolean AND a.creator_user_id IS DISTINCT FROM $2::uuid) AS restricted
   FROM library_assets a
   LEFT JOIN library_assets origin ON origin.id = a.origin_world_id
   LEFT JOIN users u ON u.id = a.creator_user_id`;
+
+function requestIdentity(request: Request) {
+  return {
+    userId: request.session.userId,
+    isSuperAdmin: request.session.discordUserId === SUPER_ADMIN_DISCORD_ID,
+  };
+}
 
 export function createLibraryRouter(config: AppConfig, pool: DatabasePool, settingsStore: SettingsStore) {
   const router = Router();
@@ -91,14 +99,19 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
   router.get('/overview', async (request, response, next) => {
     try {
       const adult = canViewAdult(request);
+      const identity = requestIdentity(request);
       const [recent, pinned, counts] = await Promise.all([
-        pool.query(`${selectAssets} ORDER BY a.updated_at DESC LIMIT 4`, [adult]),
-        pool.query(`${selectAssets} WHERE a.pinned = true ORDER BY a.updated_at DESC`, [adult]),
+        pool.query(`${selectAssets} ORDER BY a.updated_at DESC LIMIT 4`, [adult, identity.userId ?? null]),
+        pool.query(`${selectAssets} WHERE a.pinned = true ORDER BY a.updated_at DESC`, [adult, identity.userId ?? null]),
         pool.query(`SELECT type, count(*)::int AS count FROM library_assets GROUP BY type`),
       ]);
       const countMap = Object.fromEntries(assetTypes.map((type) => [type, 0]));
       for (const row of counts.rows) countMap[row.type] = row.count;
-      response.json({ recent: recent.rows.map(mapAsset), pinned: pinned.rows.map(mapAsset), counts: countMap });
+      response.json({
+        recent: recent.rows.map((row) => mapAsset(row, identity.userId, identity.isSuperAdmin)),
+        pinned: pinned.rows.map((row) => mapAsset(row, identity.userId, identity.isSuperAdmin)),
+        counts: countMap,
+      });
     } catch (error) {
       next(error);
     }
@@ -106,7 +119,8 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
 
   router.get('/assets', async (request, response, next) => {
     try {
-      const values: unknown[] = [canViewAdult(request)];
+      const identity = requestIdentity(request);
+      const values: unknown[] = [canViewAdult(request), identity.userId ?? null];
       const where: string[] = [];
       const type = typeof request.query.type === 'string' && assetTypes.includes(request.query.type as typeof assetTypes[number]) ? request.query.type : undefined;
       const sourceType = typeof request.query.sourceType === 'string' && sourceTypes.includes(request.query.sourceType as typeof sourceTypes[number]) ? request.query.sourceType : undefined;
@@ -120,7 +134,7 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
       const clause = where.length ? ` WHERE ${where.join(' AND ')}` : '';
       const order = request.query.sort === 'name' ? 'a.name ASC' : 'a.updated_at DESC';
       const result = await pool.query(`${selectAssets}${clause} ORDER BY ${order} LIMIT 200`, values);
-      response.json({ items: result.rows.map(mapAsset), total: result.rowCount });
+      response.json({ items: result.rows.map((row) => mapAsset(row, identity.userId, identity.isSuperAdmin)), total: result.rowCount });
     } catch (error) {
       next(error);
     }
@@ -129,10 +143,11 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
   router.get('/assets/:id', async (request, response, next) => {
     try {
       if (request.params.id.startsWith('restricted:')) return response.status(403).json({ error: 'Verification required.', verificationPath: '/verification' });
-      const result = await pool.query(`${selectAssets} WHERE a.id = $2`, [canViewAdult(request), request.params.id]);
+      const identity = requestIdentity(request);
+      const result = await pool.query(`${selectAssets} WHERE a.id = $3`, [canViewAdult(request), identity.userId ?? null, request.params.id]);
       if (!result.rowCount) return response.status(404).json({ error: 'Record not found.' });
       if (result.rows[0].restricted) return response.status(403).json({ error: 'Verification required.', verificationPath: '/verification' });
-      response.json(mapAsset(result.rows[0]));
+      response.json(mapAsset(result.rows[0], identity.userId, identity.isSuperAdmin));
     } catch (error) {
       next(error);
     }
@@ -146,14 +161,15 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
          VALUES ($1,$2,$3,$4,$5,$6,'user-created',$7,$8,$9,$10::jsonb) RETURNING *`,
         [randomUUID(), asset.type, asset.name, asset.summary, asset.originWorldId ?? null, request.session.userId, asset.contentRating, asset.tags, asset.visualTone, JSON.stringify(asset.document)],
       );
-      response.status(201).json(mapAsset({ ...result.rows[0], restricted: false }));
+      response.status(201).json(mapAsset({ ...result.rows[0], restricted: false }, request.session.userId));
     } catch (error) {
       next(error);
     }
   });
 
-  router.patch('/assets/:id', requireCreator(config, pool, settingsStore), async (request, response, next) => {
+  router.patch('/assets/:id', async (request, response, next) => {
     try {
+      if (!request.session.userId) return response.status(401).json({ error: 'Sign in with Discord to edit this record.' });
       const asset = updateAssetSchema.parse(request.body);
       const current = await pool.query('SELECT * FROM library_assets WHERE id = $1', [request.params.id]);
       if (!current.rowCount) return response.status(404).json({ error: 'Record not found.' });
@@ -178,7 +194,7 @@ export function createLibraryRouter(config: AppConfig, pool: DatabasePool, setti
         [request.params.id, nextAsset.name, nextAsset.summary, nextAsset.origin_world_id, nextAsset.content_rating, nextAsset.tags, nextAsset.visual_tone, JSON.stringify(nextAsset.document)],
       );
       const author = await pool.query('SELECT display_name, avatar_url FROM users WHERE id = $1', [current.rows[0].creator_user_id]);
-      response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: author.rows[0]?.display_name, author_avatar_url: author.rows[0]?.avatar_url }));
+      response.json(mapAsset({ ...result.rows[0], restricted: false, author_name: author.rows[0]?.display_name, author_avatar_url: author.rows[0]?.avatar_url }, request.session.userId, isSuperAdmin));
     } catch (error) {
       next(error);
     }

@@ -2,18 +2,19 @@
 
 Orbis is the standalone reusable asset archive for The Howling Whispers.
 
-The `HW-Library` repository contains the user-facing Orbis frontend and its Library-specific API client. It is intentionally separate from Rebrand (`HW-Landing`) and from the future Project Whispers simulation runtime.
+The `HW-Library` repository contains the user-facing Orbis frontend and its Library-specific API client. It is intentionally separate from Rebrand (`HW-Landing`) and from the Speculus simulation runtime while providing Speculus's launch and credential authority.
 
 ## Current direction
 
 - Server-backed assets, not browser-local ownership
 - Card-heavy blue warm moonlight interface
-- Reusable Characters, Places, Factions, Species, Societies, Families, Memories, and Worlds
+- Reusable Characters, Places, Items, Factions, Species, Societies, Families, Memories, and Worlds
 - Curated Howling Whispers data first
-- Project Whispers simulation launch integration later
+- Speculus simulation launches from each Library record
 - Canonical Bitterroot import from Rebrand
 - Discord authentication, ownership and verified-access controls
 - Protected Orbis administration and PostgreSQL-backed operational settings
+- Encrypted user-owned NovelAI settings and short-lived generation grants
 
 ## Branch model
 
@@ -51,7 +52,7 @@ npm run build
 npm run preview
 ```
 
-The production preview opens on `http://localhost:4174`. Deployment, DNS, reverse proxy and production secret configuration are intentionally outside this repository foundation.
+The production preview opens on `http://localhost:4174`. Production deployment also requires migration `004_speculus_bridge.sql`, a credential-encryption key, and the shared Speculus bridge secret described in `docs/platform/SPECULUS.md`.
 
 ## Source structure
 
@@ -63,8 +64,9 @@ The production preview opens on `http://localhost:4174`. Deployment, DNS, revers
 - `src/admin` and `src/views/AdminView.tsx` contain the protected administration client.
 - `server` contains Discord OAuth, access policy, settings, audit and Library endpoints.
 - `server/data/bitterroot.json` contains the canonical Bitterroot source snapshot from Rebrand.
-- `docs/API_CONTRACT.md` documents the initial server contract.
-- `docs/ADMINISTRATION.md` documents configuration precedence, recovery and deployment requirements.
+- `docs/platform/API_CONTRACT.md` documents the server contract.
+- `docs/platform/ADMINISTRATION.md` documents configuration precedence, recovery and deployment requirements.
+- `docs/platform/SPECULUS.md` documents the Orbis to Speculus launch and credential boundary.
 
 ## Bitterroot import
 

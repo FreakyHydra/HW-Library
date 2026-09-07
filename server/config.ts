@@ -20,6 +20,10 @@ const envSchema = z.object({
   VITE_DISCORD_INVITE_URL: z.string().default(''),
   ORBIS_VERSION: z.string().default('0.2.0'),
   ORBIS_BUILD_SHA: z.string().default(''),
+  ORBIS_CREDENTIAL_ENCRYPTION_KEY: z.string().default(''),
+  SPECULUS_BRIDGE_URL: z.string().url().default('http://127.0.0.1:8790'),
+  SPECULUS_BRIDGE_SECRET: z.string().default(''),
+  SPECULUS_LAUNCH_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(14_400),
 });
 
 export const parseRoleIds = (value: string) => [...new Set(value.split(',').map((id) => id.trim()).filter(Boolean))];

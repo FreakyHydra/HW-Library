@@ -1,6 +1,7 @@
 import { CheckCircle2, LogOut, ShieldAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { discordLoginPath, useAuth } from '../auth/AuthContext';
+import { deleteNovelAiSettings, getNovelAiSettings, saveNovelAiSettings, type NovelAiSettings } from '../api/provider-settings';
 import { UserAvatar } from '../components/UserAvatar';
 import { useI18n } from '../i18n/I18nContext';
 import type { Locale } from '../i18n/translations';
@@ -13,7 +14,15 @@ export function AccountView() {
   const [displayName, setDisplayName] = useState('');
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [provider, setProvider] = useState<NovelAiSettings>({ configured: false, model: 'xialong-v1' });
+  const [novelAiToken, setNovelAiToken] = useState('');
+  const [providerMessage, setProviderMessage] = useState('');
+  const [providerSaving, setProviderSaving] = useState(false);
   useEffect(() => setDisplayName(user?.displayName ?? ''), [user]);
+  useEffect(() => {
+    if (!user) return;
+    void getNovelAiSettings().then(setProvider).catch((error) => setProviderMessage(error instanceof Error ? error.message : 'Provider settings unavailable.'));
+  }, [user]);
 
   if (loading) return <div className="page"><div className="account-panel">{t('Opening your profile...')}</div></div>;
   if (!user) return (
@@ -33,11 +42,42 @@ export function AccountView() {
     { value: 'light', label: t('Light'), description: t('Use Coda’s warm ivory library theme.') },
   ];
 
+  const saveProvider = async (event: React.FormEvent) => {
+    event.preventDefault(); setProviderSaving(true); setProviderMessage('');
+    try {
+      const next = await saveNovelAiSettings(novelAiToken, provider.model);
+      setProvider(next); setNovelAiToken(''); setProviderMessage('NovelAI connection saved for Speculus.');
+    } catch (error) { setProviderMessage(error instanceof Error ? error.message : 'Could not save NovelAI settings.'); }
+    finally { setProviderSaving(false); }
+  };
+
+  const removeProvider = async () => {
+    setProviderSaving(true); setProviderMessage('');
+    try { setProvider(await deleteNovelAiSettings()); setNovelAiToken(''); setProviderMessage('NovelAI connection removed.'); }
+    catch (error) { setProviderMessage(error instanceof Error ? error.message : 'Could not remove NovelAI settings.'); }
+    finally { setProviderSaving(false); }
+  };
+
   return (
     <div className="page account-page">
       <section className="account-panel">
         <div className="account-identity"><UserAvatar user={user} size={72} /><div><span className="eyebrow">{t('Signed in through Discord')}</span><h1>{user.displayName}</h1><p>@{user.discordUsername}</p></div></div>
         <form className="profile-form" onSubmit={save}><label htmlFor="display-name">{t('Coda display name')}</label><div><input id="display-name" value={displayName} minLength={2} maxLength={40} onChange={(event) => setDisplayName(event.target.value)} /><button className="button button--primary" disabled={saving || displayName.trim() === user.displayName}>{saving ? t('Saving...') : t('Save name')}</button></div><small>{t('This changes the author name shown on all your creations. Ownership stays tied to your Discord ID.')}</small>{message && <p className="form-message" role="status">{message}</p>}</form>
+
+        <form className="profile-form" onSubmit={saveProvider}>
+          <label htmlFor="novelai-token">NovelAI for Speculus</label>
+          <div>
+            <input id="novelai-token" type="password" autoComplete="off" value={novelAiToken} minLength={16} maxLength={4096} onChange={(event) => setNovelAiToken(event.target.value)} placeholder={provider.configured ? 'Token saved. Paste to replace it.' : 'Paste your NovelAI access token'} />
+            <select aria-label="NovelAI model" value={provider.model} onChange={(event) => setProvider({ ...provider, model: event.target.value as NovelAiSettings['model'] })}>
+              <option value="xialong-v1">Xialong</option>
+              <option value="glm-4-6">GLM 4.6</option>
+            </select>
+            <button className="button button--primary" disabled={providerSaving || novelAiToken.trim().length < 16}>{providerSaving ? 'Saving...' : provider.configured ? 'Replace token' : 'Save token'}</button>
+            {provider.configured && <button className="button button--ghost" type="button" disabled={providerSaving} onClick={() => void removeProvider()}>Remove</button>}
+          </div>
+          <small>The token is encrypted in Orbis and never sent to the Speculus browser or service. Speculus receives only a temporary generation grant.</small>
+          {providerMessage && <p className="form-message" role="status">{providerMessage}</p>}
+        </form>
 
         <div className="profile-form language-setting">
           <label htmlFor="interface-language">{t('Interface language')}</label>
@@ -72,7 +112,7 @@ export function AccountView() {
 
         <div className="permission-card">
           {user.permissions.canCreate ? <CheckCircle2 /> : <ShieldAlert />}
-          <div><strong>{user.permissions.canCreate ? t('Verified creator') : t('Safe browsing access')}</strong><p>{user.permissions.canCreate ? t('You can view adult records and create or edit your own work.') : t('You can browse SFW records. Restricted cards lead to the verification guide.')}</p></div>
+          <div><strong>{user.permissions.canCreate ? t('Verified creator') : t('Safe browsing access')}</strong><p>{user.permissions.canCreate ? t('You can view adult records and create new work. You can always edit records you own.') : t('You can browse SFW records and still edit records you own. Restricted cards lead to the verification guide.')}</p></div>
         </div>
         <button className="button button--ghost" onClick={() => void logout()}><LogOut size={16} /> {t('Sign out')}</button>
       </section>

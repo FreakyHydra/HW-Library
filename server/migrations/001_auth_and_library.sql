@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS library_assets (
   id uuid PRIMARY KEY,
-  type text NOT NULL CHECK (type IN ('world','character','place','faction','species','society','family','memory')),
+  type text NOT NULL CHECK (type IN ('world','character','place','item','faction','species','society','family','memory')),
   name text NOT NULL,
   summary text NOT NULL DEFAULT '',
   origin_world_id uuid REFERENCES library_assets(id) ON DELETE SET NULL,

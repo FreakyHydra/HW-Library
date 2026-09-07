@@ -5,6 +5,7 @@ export interface LibraryApi {
   listAssets(query?: AssetQuery, signal?: AbortSignal): Promise<AssetListResponse>;
   getAsset(id: string, signal?: AbortSignal): Promise<LibraryAsset>;
   updateAsset(id: string, update: LibraryAssetUpdate): Promise<LibraryAsset>;
+  simulateAsset(id: string): Promise<{ launchUrl: string; expiresAt: number }>;
 }
 
 export class LibraryApiError extends Error {

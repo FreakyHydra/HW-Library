@@ -11,6 +11,7 @@ const germanNavigation: Record<string, { label: string; description: string }> =
   world: { label: 'Welten', description: 'Vollständig erstellte Realitäten und ihr Kanon.' },
   character: { label: 'Charaktere', description: 'Die Personen und Persönlichkeiten, die in ihnen leben.' },
   place: { label: 'Orte', description: 'Regionen, Wege, Zufluchtsorte und Räume.' },
+  item: { label: 'Gegenstände', description: 'Objekte, Werkzeuge, Artefakte und Besitztümer.' },
   faction: { label: 'Fraktionen', description: 'Bündnisse, Clans und organisierte Kräfte.' },
   species: { label: 'Spezies', description: 'Völker, Formen und vererbte Merkmale.' },
   society: { label: 'Gesellschaften', description: 'Kulturen, Bräuche und Gemeinschaften.' },

@@ -10,7 +10,9 @@ import { createAdminRouter, requireAdmin } from './admin.js';
 import { loadConfig } from './config.js';
 import { createPool } from './db.js';
 import { createLibraryRouter } from './library.js';
+import { createProviderSettingsRouter } from './provider-settings.js';
 import { PostgresSettingsStore } from './settings.js';
+import { createSpeculusGenerationRouter, createSpeculusLaunchRouter } from './speculus.js';
 import './types.js';
 
 const config = loadConfig();
@@ -32,6 +34,10 @@ app.use(session({
   store: new PgStore({ pool, tableName: 'session', createTableIfMissing: false }),
   cookie: { httpOnly: true, secure: config.isProduction, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000, path: '/' },
 }));
+
+// Speculus authenticates this server-to-server route with an opaque generation grant,
+// so it intentionally sits outside the browser Origin check below.
+app.use('/api/v1/generation', createSpeculusGenerationRouter(config, pool));
 
 app.use((request, response, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return next();
@@ -55,7 +61,9 @@ app.get('/api/config/public', async (_request, response, next) => {
   } catch (error) { next(error); }
 });
 app.use('/api/auth', createAuthRouter(config, pool, settingsStore));
+app.use('/api/provider-settings', createProviderSettingsRouter(config, pool));
 app.use('/api/admin', requireAdmin(config, pool, settingsStore), createAdminRouter(config, pool, settingsStore));
+app.use('/api/v1/library', createSpeculusLaunchRouter(config, pool, settingsStore));
 app.use('/api/v1/library', createLibraryRouter(config, pool, settingsStore));
 
 if (config.isProduction) {

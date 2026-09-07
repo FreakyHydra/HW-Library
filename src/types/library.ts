@@ -2,6 +2,7 @@ export const assetTypes = [
   'world',
   'character',
   'place',
+  'item',
   'faction',
   'species',
   'society',
@@ -39,6 +40,7 @@ export interface LibraryAsset {
   verificationPath?: string;
   sourceAssetId?: string;
   document?: Record<string, unknown>;
+  canEdit?: boolean;
 }
 
 export interface LibraryAssetUpdate {

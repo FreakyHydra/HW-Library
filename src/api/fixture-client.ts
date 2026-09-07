@@ -41,4 +41,8 @@ export class FixtureLibraryApi implements LibraryApi {
     Object.assign(asset, update, { updatedAt: new Date().toISOString() });
     return asset;
   }
+
+  async simulateAsset(_id: string): Promise<{ launchUrl: string; expiresAt: number }> {
+    throw new Error('Speculus launches require the live Orbis API.');
+  }
 }
