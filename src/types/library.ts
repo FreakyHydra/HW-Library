@@ -40,6 +40,10 @@ export interface LibraryAsset {
   verificationPath?: string;
   sourceAssetId?: string;
   document?: Record<string, unknown>;
+  speculus?: {
+    code: string;
+    classification: string;
+  };
   canEdit?: boolean;
 }
 
