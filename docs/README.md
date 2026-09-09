@@ -26,7 +26,6 @@ Living-world and multiplayer design specifications live in [`fabula/`](./fabula/
 
 - [Multiplayer and Shared Presence](./fabula/FABULA_MULTIPLAYER_AND_PRESENCE.md)
 - [Time and Lifecycle Simulation](./fabula/FABULA_TIME_AND_LIFECYCLE.md)
-- [Narrative Dice and Resolution System](./fabula/FABULA_NARRATIVE_DICE.md)
 
 ## Platform
 
